@@ -1,13 +1,18 @@
 import { MetadataRoute } from 'next'
-import { supabase } from '@/lib/supabase'
+
+export const dynamic = 'force-dynamic'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = 'https://magnetstickers.art'
 
-  const { data: categories } = await supabase
-    .from('categories').select('slug, created_at').eq('is_active', true)
-  const { data: products } = await supabase
-    .from('products').select('slug, updated_at').eq('is_active', true)
+  // Import here to avoid edge runtime issues
+  const { supabaseAdmin } = await import('@/lib/supabase')
+  const db = supabaseAdmin()
+
+  const [{ data: categories }, { data: products }] = await Promise.all([
+    db.from('categories').select('slug, created_at').eq('is_active', true),
+    db.from('products').select('slug, updated_at').eq('is_active', true).limit(1000),
+  ])
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: base, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
@@ -18,14 +23,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categoryRoutes: MetadataRoute.Sitemap = (categories ?? []).map(c => ({
     url: `${base}/shop/${c.slug}`,
     lastModified: new Date(c.created_at),
-    changeFrequency: 'weekly',
+    changeFrequency: 'weekly' as const,
     priority: 0.8,
   }))
 
   const productRoutes: MetadataRoute.Sitemap = (products ?? []).map(p => ({
     url: `${base}/product/${p.slug}`,
     lastModified: new Date(p.updated_at),
-    changeFrequency: 'weekly',
+    changeFrequency: 'weekly' as const,
     priority: 0.7,
   }))
 

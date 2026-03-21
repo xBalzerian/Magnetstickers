@@ -9,17 +9,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#fef0f7',
-          100: '#fde0ef',
-          500: '#e91e8c',
-          600: '#c4166f',
-          700: '#a01259',
-          900: '#6b0c3b',
+        primary: {
+          50: '#fdf2f8',
+          100: '#fce7f3',
+          500: '#ec4899',
+          600: '#db2777',
         },
-      },
-      fontFamily: {
-        sans: ['var(--font-geist-sans)', 'system-ui', 'sans-serif'],
       },
     },
   },

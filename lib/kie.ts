@@ -1,83 +1,44 @@
-// KIE API wrapper for Z-Image generation
+// KIE Z-Image API wrapper for generating die-cut magnet sticker designs
 const KIE_BASE = 'https://api.kie.ai'
-const KIE_API_KEY = process.env.KIE_API_KEY!
+const KEY = process.env.KIE_API_KEY!
 
-export interface KieTask {
-  taskId: string
-  model: string
-  state: 'waiting' | 'queuing' | 'generating' | 'success' | 'fail'
-  resultJson?: string
-  failMsg?: string
-  costTime?: number
-}
-
-export interface GenerateImageParams {
+export async function generateImage(params: {
   prompt: string
-  aspect_ratio?: '1:1' | '4:3' | '3:4' | '16:9' | '9:16'
+  aspect_ratio?: string
+  negative_prompt?: string
   nsfw_checker?: boolean
-  callBackUrl?: string
-}
-
-// Submit image generation task
-export async function generateImage(params: GenerateImageParams): Promise<string> {
-  const res = await fetch(`${KIE_BASE}/api/v1/jobs/createTask`, {
+}): Promise<string> {
+  const res = await fetch(`${KIE_BASE}/api/v1/image/generation`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${KIE_API_KEY}`,
+      'Authorization': `Bearer ${KEY}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'z-image',
-      callBackUrl: params.callBackUrl,
-      input: {
-        prompt: params.prompt,
-        aspect_ratio: params.aspect_ratio ?? '1:1',
-        nsfw_checker: params.nsfw_checker ?? false,
-      },
+      model: 'flux-schnell',
+      prompt: params.prompt,
+      negative_prompt: params.negative_prompt ?? 'watermark, signature, text, blurry, low quality, dark background, busy background, complex background',
+      aspect_ratio: params.aspect_ratio ?? '1:1',
+      nsfw_checker: params.nsfw_checker ?? false,
+      num_images: 1,
     }),
   })
   const data = await res.json()
-  if (data.code !== 200) throw new Error(`KIE API error: ${data.msg}`)
-  return data.data.taskId
+  if (!data.task_id) throw new Error(`KIE generation failed: ${JSON.stringify(data)}`)
+  return data.task_id as string
 }
 
-// Poll task status
-export async function getTaskStatus(taskId: string): Promise<KieTask> {
-  const res = await fetch(`${KIE_BASE}/api/v1/jobs/recordInfo?taskId=${taskId}`, {
-    headers: { 'Authorization': `Bearer ${KIE_API_KEY}` },
+export async function getTaskStatus(taskId: string): Promise<{
+  state: 'pending' | 'processing' | 'success' | 'fail'
+  images?: { url: string }[]
+  error?: string
+}> {
+  const res = await fetch(`${KIE_BASE}/api/v1/image/generation/${taskId}`, {
+    headers: { 'Authorization': `Bearer ${KEY}` },
   })
-  const data = await res.json()
-  if (data.code !== 200) throw new Error(`KIE status error: ${data.msg}`)
-  return data.data as KieTask
+  return res.json()
 }
 
-// Get result image URLs from a completed task
-export function extractResultUrls(task: KieTask): string[] {
-  if (!task.resultJson) return []
-  try {
-    const parsed = JSON.parse(task.resultJson)
-    return parsed.resultUrls ?? []
-  } catch {
-    return []
-  }
-}
-
-// Wait for task completion with polling (max 3 minutes)
-export async function waitForTask(taskId: string, intervalMs = 5000): Promise<KieTask> {
-  const maxAttempts = 36 // 3 min
-  for (let i = 0; i < maxAttempts; i++) {
-    const task = await getTaskStatus(taskId)
-    if (task.state === 'success' || task.state === 'fail') return task
-    await new Promise(r => setTimeout(r, intervalMs))
-  }
-  throw new Error(`Task ${taskId} timed out`)
-}
-
-// Check remaining KIE credits
-export async function getCredits(): Promise<number> {
-  const res = await fetch(`${KIE_BASE}/api/v1/chat/credit`, {
-    headers: { 'Authorization': `Bearer ${KIE_API_KEY}` },
-  })
-  const data = await res.json()
-  return data.data ?? 0
+export function extractResultUrls(task: { images?: { url: string }[] }): string[] {
+  return (task.images ?? []).map(img => img.url).filter(Boolean)
 }
