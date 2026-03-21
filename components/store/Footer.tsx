@@ -1,30 +1,30 @@
 import Link from 'next/link'
 
 export default function Footer() {
+  const year = new Date().getFullYear()
   return (
-    <footer className="bg-gray-950 text-gray-400">
-      {/* Top section */}
-      <div className="max-w-7xl mx-auto px-4 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
+    <footer className="bg-gray-950 text-gray-500 border-t border-white/5">
 
-        {/* Brand - spans 2 cols */}
-        <div className="lg:col-span-2">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-xl">🧲</span>
+      {/* Main grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-10">
+
+        {/* Brand */}
+        <div className="col-span-2 lg:col-span-2">
+          <Link href="/" className="flex items-center gap-3 mb-5 group w-fit">
+            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-pink-500/20 group-hover:shadow-pink-500/30 transition-shadow">
+              <span className="text-white font-black text-sm tracking-tighter">MS</span>
             </div>
             <div>
-              <span className="text-white font-black text-xl">Magnet</span>
-              <span className="text-pink-400 font-black text-xl">Stickers</span>
+              <div className="text-white font-black text-lg tracking-tight">Magnet<span className="text-pink-500">Stickers</span></div>
+              <div className="text-xs text-gray-600">magnetstickers.art</div>
             </div>
-          </div>
-          <p className="text-sm text-gray-400 leading-relaxed mb-5 max-w-xs">
-            The world&apos;s biggest die-cut magnet sticker store. Thousands of unique designs, 
-            premium quality, shipped to 190+ countries worldwide.
+          </Link>
+          <p className="text-sm text-gray-600 leading-relaxed mb-6 max-w-xs">
+            The world&apos;s biggest die-cut magnet sticker store. Thousands of unique AI-illustrated designs shipped to 190+ countries worldwide.
           </p>
-          {/* Trust badges */}
           <div className="flex flex-wrap gap-2">
-            {['✂️ Die-Cut', '🎨 AI Art', '🌍 Worldwide', '🔒 Secure'].map(badge => (
-              <span key={badge} className="text-xs bg-white/5 border border-white/10 text-gray-400 px-3 py-1 rounded-full">
+            {['Die-Cut Precision', 'AI Illustration', 'Global Shipping', 'Printful Fulfilled'].map(badge => (
+              <span key={badge} className="text-xs bg-white/5 border border-white/8 text-gray-500 px-3 py-1 rounded-full font-medium">
                 {badge}
               </span>
             ))}
@@ -33,21 +33,23 @@ export default function Footer() {
 
         {/* Shop */}
         <div>
-          <h3 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">Shop</h3>
-          <ul className="space-y-2.5 text-sm">
+          <h3 className="text-white font-bold mb-5 text-xs uppercase tracking-widest">Shop</h3>
+          <ul className="space-y-3">
             {[
               ['All Magnets', '/shop'],
-              ['🐾 Animals', '/shop/animals'],
-              ['🐶 Dog Breeds', '/shop/animals-dogs'],
-              ['🐱 Cat Breeds', '/shop/animals-cats'],
-              ['🦁 Wildlife', '/shop/wildlife'],
-              ['🍎 Fruits', '/shop/fruits'],
-              ['🥦 Vegetables', '/shop/vegetables'],
-              ['💬 Quotes', '/shop/quotes'],
-              ['🍕 Food & Drinks', '/shop/food-drinks'],
+              ['Animals', '/shop/animals'],
+              ['Dog Breeds', '/shop/animals-dogs'],
+              ['Cat Breeds', '/shop/animals-cats'],
+              ['Wildlife', '/shop/wildlife'],
+              ['Fruits', '/shop/fruits'],
+              ['Vegetables', '/shop/vegetables'],
+              ['Quotes', '/shop/quotes'],
+              ['Food & Drinks', '/shop/food-drinks'],
             ].map(([label, href]) => (
               <li key={href}>
-                <Link href={href} className="hover:text-pink-400 transition-colors">{label}</Link>
+                <Link href={href} className="text-xs text-gray-600 hover:text-gray-300 transition-colors leading-relaxed">
+                  {label}
+                </Link>
               </li>
             ))}
           </ul>
@@ -55,38 +57,41 @@ export default function Footer() {
 
         {/* Support */}
         <div>
-          <h3 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">Support</h3>
-          <ul className="space-y-2.5 text-sm">
+          <h3 className="text-white font-bold mb-5 text-xs uppercase tracking-widest">Support</h3>
+          <ul className="space-y-3">
             {[
               ['Track My Order', '/order-tracking'],
-              ['Shipping & Delivery', '/shipping'],
+              ['Shipping Info', '/shipping'],
               ['Returns & Refunds', '/returns'],
               ['FAQ', '/faq'],
               ['Contact Us', '/contact'],
               ['Size Guide', '/size-guide'],
             ].map(([label, href]) => (
               <li key={href}>
-                <Link href={href} className="hover:text-pink-400 transition-colors">{label}</Link>
+                <Link href={href} className="text-xs text-gray-600 hover:text-gray-300 transition-colors">
+                  {label}
+                </Link>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* Info + Quality */}
+        {/* Quality */}
         <div>
-          <h3 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">Quality Promise</h3>
-          <ul className="space-y-3 text-sm">
+          <h3 className="text-white font-bold mb-5 text-xs uppercase tracking-widest">Our Promise</h3>
+          <ul className="space-y-3">
             {[
-              ['✂️', 'Perfect die-cut edge on every order'],
-              ['🧲', '20mil premium flexible vinyl magnet'],
-              ['🎨', 'Matte UV-resistant full-color print'],
-              ['📦', 'Fulfilled by Printful — trusted worldwide'],
-              ['🔄', 'Satisfaction guaranteed'],
-              ['⚡', 'Ships within 24–48 hours'],
-            ].map(([icon, text]) => (
+              ['Die-cut to exact shape, no square borders'],
+              ['20mil premium flexible vinyl'],
+              ['Matte UV-resistant full-color print'],
+              ['150+ DPI — every detail sharp'],
+              ['Printful production & fulfillment'],
+              ['Ships within 24–48 hours'],
+              ['Satisfaction guaranteed'],
+            ].map(([text]) => (
               <li key={text} className="flex items-start gap-2">
-                <span className="flex-shrink-0">{icon}</span>
-                <span>{text}</span>
+                <span className="w-1 h-1 rounded-full bg-pink-500 mt-1.5 flex-shrink-0" />
+                <span className="text-xs text-gray-600 leading-relaxed">{text}</span>
               </li>
             ))}
           </ul>
@@ -94,18 +99,18 @@ export default function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-white/5 py-6 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-gray-600">
-            © {new Date().getFullYear()} MagnetStickers — All rights reserved · Fulfilled by Printful
+      <div className="border-t border-white/5 py-5 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-gray-700 text-center sm:text-left">
+            &copy; {year} MagnetStickers &mdash; All rights reserved &nbsp;&middot;&nbsp; Fulfilled by Printful
           </p>
-          <div className="flex items-center gap-5 text-xs text-gray-600">
+          <div className="flex items-center gap-5 text-xs text-gray-700">
             <Link href="/privacy" className="hover:text-gray-400 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-gray-400 transition-colors">Terms of Service</Link>
             <Link href="/sitemap.xml" className="hover:text-gray-400 transition-colors">Sitemap</Link>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 bg-green-500 rounded-full" />
-              All systems operational
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+              <span>All systems normal</span>
             </span>
           </div>
         </div>

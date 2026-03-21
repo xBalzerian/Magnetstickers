@@ -4,13 +4,30 @@ import { useState, useEffect } from 'react'
 import { ShoppingCart, Menu, X, Search, ChevronDown } from 'lucide-react'
 import { getCartCount, getCart } from '@/lib/cart'
 
-const CATEGORIES = [
-  { href: '/shop/animals',       label: 'Animals',     sub: ['Dogs', 'Cats', 'Birds', 'Fish', 'Rabbits'] },
-  { href: '/shop/wildlife',      label: 'Wildlife',    sub: ['Big Cats', 'Primates', 'Reptiles', 'Ocean'] },
-  { href: '/shop/fruits',        label: 'Fruits',      sub: [] },
-  { href: '/shop/vegetables',    label: 'Vegetables',  sub: [] },
-  { href: '/shop/quotes',        label: 'Quotes',      sub: [] },
-  { href: '/shop/food-drinks',   label: 'Food & Drinks', sub: [] },
+const NAV = [
+  {
+    label: 'Animals',
+    href: '/shop/animals',
+    subs: [
+      { label: 'Dog Breeds', href: '/shop/animals-dogs' },
+      { label: 'Cat Breeds', href: '/shop/animals-cats' },
+      { label: 'Birds', href: '/shop/animals-birds' },
+      { label: 'Rabbits', href: '/shop/animals-rabbits' },
+    ],
+  },
+  {
+    label: 'Wildlife',
+    href: '/shop/wildlife',
+    subs: [
+      { label: 'Big Cats', href: '/shop/wildlife-big-cats' },
+      { label: 'Ocean Life', href: '/shop/wildlife-ocean' },
+      { label: 'Primates', href: '/shop/wildlife-primates' },
+    ],
+  },
+  { label: 'Fruits', href: '/shop/fruits', subs: [] },
+  { label: 'Vegetables', href: '/shop/vegetables', subs: [] },
+  { label: 'Quotes', href: '/shop/quotes', subs: [] },
+  { label: 'Food & Drinks', href: '/shop/food-drinks', subs: [] },
 ]
 
 export default function Header() {
@@ -19,13 +36,13 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQ, setSearchQ] = useState('')
   const [scrolled, setScrolled] = useState(false)
-  const [announcementVisible, setAnnouncementVisible] = useState(true)
+  const [openSub, setOpenSub] = useState<string | null>(null)
 
   useEffect(() => {
     const update = () => setCartCount(getCartCount(getCart()))
     update()
     window.addEventListener('cart-updated', update)
-    const onScroll = () => setScrolled(window.scrollY > 10)
+    const onScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', onScroll)
     return () => {
       window.removeEventListener('cart-updated', update)
@@ -33,61 +50,55 @@ export default function Header() {
     }
   }, [])
 
-  function handleSearch(e: React.FormEvent) {
+  function submitSearch(e: React.FormEvent) {
     e.preventDefault()
-    if (searchQ.trim()) {
-      window.location.href = `/shop?q=${encodeURIComponent(searchQ.trim())}`
-    }
+    if (searchQ.trim()) window.location.href = `/shop?q=${encodeURIComponent(searchQ.trim())}`
   }
 
   return (
     <div className="sticky top-0 z-50">
       {/* Announcement bar */}
-      {announcementVisible && (
-        <div className="bg-gradient-to-r from-pink-600 to-purple-700 text-white text-xs font-semibold py-2 px-4 flex items-center justify-center gap-2 relative">
-          <span>🌍 Free shipping on orders over $35 · Ships to 190+ countries · Die-cut precision on every magnet ✂️</span>
-          <button onClick={() => setAnnouncementVisible(false)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white">
-            <X size={14} />
-          </button>
-        </div>
-      )}
+      <div className="bg-gray-950 text-gray-400 text-xs font-medium py-2 px-4 text-center border-b border-white/5 hidden sm:block">
+        Free shipping on orders over $35 &nbsp;·&nbsp; Ships to 190+ countries &nbsp;·&nbsp; Die-cut precision on every order &nbsp;·&nbsp; Fulfilled by Printful
+      </div>
 
-      {/* Main header */}
-      <header className={`bg-white transition-shadow ${scrolled ? 'shadow-lg' : 'border-b border-gray-100'}`}>
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+      {/* Main nav */}
+      <header className={`bg-gray-950 border-b border-white/10 transition-all duration-300 ${scrolled ? 'shadow-2xl shadow-black/50' : ''}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0 group">
-            <div className="w-9 h-9 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-              <span className="text-lg">🧲</span>
+          <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
+            <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-pink-500/20 group-hover:shadow-pink-500/40 transition-shadow">
+              <span className="text-white font-black text-xs tracking-tighter">MS</span>
             </div>
-            <div className="hidden sm:block">
-              <span className="font-black text-gray-900 text-lg">Magnet</span>
-              <span className="font-black text-pink-500 text-lg">Stickers</span>
+            <div className="hidden sm:flex flex-col leading-none">
+              <span className="font-black text-white text-base tracking-tight">Magnet<span className="text-pink-500">Stickers</span></span>
+              <span className="text-gray-600 text-xs">magnetstickers.art</span>
             </div>
           </Link>
 
-          {/* Desktop Nav */}
+          {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-1">
             <Link href="/shop"
-              className="px-3 py-2 text-sm font-bold text-pink-600 bg-pink-50 rounded-lg hover:bg-pink-100 transition-colors">
+              className="px-3 py-2 text-xs font-bold text-pink-400 bg-pink-500/10 border border-pink-500/20 rounded-lg hover:bg-pink-500/20 transition-all tracking-wide uppercase">
               All Magnets
             </Link>
-            {CATEGORIES.slice(0, 5).map(cat => (
-              <div key={cat.href} className="relative group">
-                <Link href={cat.href}
-                  className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-pink-600 hover:bg-gray-50 rounded-lg transition-colors">
-                  {cat.label}
-                  {cat.sub.length > 0 && <ChevronDown size={13} className="opacity-50 group-hover:opacity-100" />}
+            {NAV.map(item => (
+              <div key={item.href} className="relative group"
+                onMouseEnter={() => setOpenSub(item.href)}
+                onMouseLeave={() => setOpenSub(null)}>
+                <Link href={item.href}
+                  className="flex items-center gap-1 px-3 py-2 text-xs font-medium text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/5">
+                  {item.label}
+                  {item.subs.length > 0 && <ChevronDown size={12} className="opacity-50" />}
                 </Link>
-                {cat.sub.length > 0 && (
-                  <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                    <div className="bg-white rounded-xl shadow-xl border border-gray-100 py-2 min-w-40">
-                      {cat.sub.map(s => (
-                        <Link key={s} href={`${cat.href}-${s.toLowerCase().replace(/\s+/g,'-')}`}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition-colors">
-                          {s}
+                {item.subs.length > 0 && openSub === item.href && (
+                  <div className="absolute top-full left-0 pt-1 z-50">
+                    <div className="bg-gray-900 border border-white/10 rounded-xl shadow-2xl shadow-black/50 py-2 min-w-44 overflow-hidden">
+                      {item.subs.map(s => (
+                        <Link key={s.href} href={s.href}
+                          className="block px-4 py-2.5 text-xs text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+                          {s.label}
                         </Link>
                       ))}
                     </div>
@@ -97,59 +108,81 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Right actions */}
+          {/* Right */}
           <div className="flex items-center gap-2">
-            {/* Search */}
-            <form onSubmit={handleSearch}
-              className={`${searchOpen ? 'flex' : 'hidden lg:flex'} items-center bg-gray-100 hover:bg-gray-200 rounded-full px-3 py-2 gap-2 transition-colors`}>
-              <Search size={15} className="text-gray-400 shrink-0" />
-              <input type="text" placeholder="Search magnets…" value={searchQ}
+            {/* Desktop search */}
+            <form onSubmit={submitSearch}
+              className="hidden lg:flex items-center bg-white/5 border border-white/10 hover:border-white/20 rounded-xl px-3 py-2 gap-2 transition-all">
+              <Search size={14} className="text-gray-500 shrink-0" />
+              <input type="text" placeholder="Search designs…" value={searchQ}
                 onChange={e => setSearchQ(e.target.value)}
-                className="bg-transparent text-sm outline-none w-32 xl:w-44 text-gray-700 placeholder-gray-400" />
+                className="bg-transparent text-xs outline-none w-36 xl:w-48 text-gray-300 placeholder-gray-600" />
             </form>
+
+            {/* Mobile search toggle */}
             <button onClick={() => setSearchOpen(!searchOpen)}
-              className="lg:hidden p-2 text-gray-600 hover:text-pink-500 transition-colors">
-              <Search size={20} />
+              className="lg:hidden p-2 text-gray-500 hover:text-white transition-colors">
+              <Search size={18} />
             </button>
 
             {/* Cart */}
             <Link href="/cart"
-              className="relative flex items-center gap-1.5 bg-gray-900 hover:bg-pink-600 text-white pl-3 pr-4 py-2 rounded-full transition-all font-semibold text-sm shadow-sm">
-              <ShoppingCart size={16} />
+              className="relative flex items-center gap-1.5 bg-pink-500 hover:bg-pink-400 text-white px-3 py-2 rounded-xl transition-all font-bold text-xs shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40">
+              <ShoppingCart size={15} />
               <span className="hidden sm:block">Cart</span>
               {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-pink-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-black border-2 border-white">
+                <span className="absolute -top-1.5 -right-1.5 bg-yellow-400 text-gray-900 text-xs w-4.5 h-4.5 min-w-[18px] min-h-[18px] rounded-full flex items-center justify-center font-black border-2 border-gray-950 text-[10px]">
                   {cartCount > 9 ? '9+' : cartCount}
                 </span>
               )}
             </Link>
 
-            {/* Mobile hamburger */}
+            {/* Mobile menu */}
             <button onClick={() => setMenuOpen(!menuOpen)}
-              className="lg:hidden p-2 text-gray-600 hover:text-pink-500 transition-colors">
-              {menuOpen ? <X size={22} /> : <Menu size={22} />}
+              className="lg:hidden p-2 text-gray-400 hover:text-white transition-colors">
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
 
+        {/* Mobile search bar */}
+        {searchOpen && (
+          <div className="lg:hidden px-4 pb-3">
+            <form onSubmit={submitSearch}
+              className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-2">
+              <Search size={16} className="text-gray-500" />
+              <input type="text" placeholder="Search magnet designs…" value={searchQ}
+                onChange={e => setSearchQ(e.target.value)} autoFocus
+                className="bg-transparent text-sm outline-none flex-1 text-gray-300 placeholder-gray-600" />
+            </form>
+          </div>
+        )}
+
         {/* Mobile menu */}
         {menuOpen && (
-          <div className="lg:hidden bg-white border-t border-gray-100 px-4 py-5 space-y-1 shadow-xl">
-            <form onSubmit={handleSearch} className="flex items-center bg-gray-100 rounded-xl px-4 py-2.5 gap-2 mb-4">
-              <Search size={16} className="text-gray-400" />
-              <input type="text" placeholder="Search magnets…" value={searchQ}
-                onChange={e => setSearchQ(e.target.value)}
-                className="bg-transparent text-sm outline-none flex-1 text-gray-700" />
-            </form>
+          <div className="lg:hidden bg-gray-950 border-t border-white/10 px-4 py-4 space-y-0.5 max-h-[75vh] overflow-y-auto">
             <Link href="/shop" onClick={() => setMenuOpen(false)}
-              className="flex items-center px-3 py-2.5 text-sm font-bold text-pink-600 bg-pink-50 rounded-xl">
-              ✨ All Magnets
+              className="flex items-center justify-between px-4 py-3 text-sm font-bold text-pink-400 bg-pink-500/10 border border-pink-500/20 rounded-xl mb-2">
+              All Magnets
+              <span className="text-xs text-pink-500/50">Shop All</span>
             </Link>
-            {CATEGORIES.map(cat => (
-              <Link key={cat.href} href={cat.href} onClick={() => setMenuOpen(false)}
-                className="flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-xl transition-colors">
-                {cat.label}
-              </Link>
+            {NAV.map(item => (
+              <div key={item.href}>
+                <Link href={item.href} onClick={() => setMenuOpen(false)}
+                  className="flex items-center px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
+                  {item.label}
+                </Link>
+                {item.subs.length > 0 && (
+                  <div className="ml-4 space-y-0.5 mb-1">
+                    {item.subs.map(s => (
+                      <Link key={s.href} href={s.href} onClick={() => setMenuOpen(false)}
+                        className="flex items-center px-4 py-2 text-xs text-gray-500 hover:text-gray-300 hover:bg-white/5 rounded-xl transition-colors">
+                        {s.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}
