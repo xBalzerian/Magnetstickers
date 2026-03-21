@@ -1,86 +1,72 @@
 'use client'
 import { useState } from 'react'
+import { ShoppingCart, Check, Plus, Minus } from 'lucide-react'
 import { addToCart } from '@/lib/cart'
-import { ShoppingCart, Check } from 'lucide-react'
-import { PRINTFUL_VARIANTS, type MagnetSize } from '@/lib/printful'
 
 interface Props {
   product: {
     id: string
     name: string
     slug: string
-    images: string[]
-    price_cents: number
-    printful_variant_id?: number | null
+    images?: string[]
+    price?: number
   }
 }
 
 export default function AddToCartButton({ product }: Props) {
+  const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
-  const [size, setSize] = useState<MagnetSize>('3x3')
-
-  const selectedVariant = PRINTFUL_VARIANTS[size]
-  // Selling price = cost + markup (~3.5x markup for healthy margin)
-  const prices: Record<MagnetSize, number> = { '3x3': 1199, '4x4': 1499, '6x6': 1999 }
 
   function handleAdd() {
     addToCart({
-      productId: product.id,
-      name: `${product.name} (${selectedVariant.label})`,
+      id: product.id,
+      name: product.name,
       slug: product.slug,
+      price: product.price ?? 11.99,
       image: product.images?.[0] ?? null,
-      priceCents: prices[size],
-      printfulVariantId: selectedVariant.id,
+      quantity: qty,
     })
     setAdded(true)
-    setTimeout(() => setAdded(false), 2000)
+    setTimeout(() => setAdded(false), 2500)
   }
 
   return (
-    <div className="space-y-4">
-      {/* Size selector */}
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">Size</label>
-        <div className="flex gap-3">
-          {(Object.entries(PRINTFUL_VARIANTS) as [MagnetSize, typeof PRINTFUL_VARIANTS[MagnetSize]][]).map(([key, v]) => (
-            <button
-              key={key}
-              onClick={() => setSize(key)}
-              className={`flex-1 border-2 rounded-xl py-3 px-2 text-center transition-all ${
-                size === key
-                  ? 'border-pink-500 bg-pink-50 text-pink-700'
-                  : 'border-gray-200 text-gray-600 hover:border-gray-300'
-              }`}
-            >
-              <div className="font-bold text-sm">{v.label}</div>
-              <div className="text-xs text-gray-500">{v.sizeCm}</div>
-              <div className="text-sm font-semibold mt-1">${(prices[key] / 100).toFixed(2)}</div>
-            </button>
-          ))}
+    <div className="flex flex-col gap-3 w-full">
+      {/* Qty + Add to Cart row */}
+      <div className="flex items-center gap-3">
+        {/* Qty */}
+        <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl p-1.5">
+          <button onClick={() => setQty(q => Math.max(1, q - 1))}
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white">
+            <Minus size={14} />
+          </button>
+          <span className="font-black text-white text-base min-w-[28px] text-center">{qty}</span>
+          <button onClick={() => setQty(q => q + 1)}
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white">
+            <Plus size={14} />
+          </button>
         </div>
+
+        {/* Add to cart */}
+        <button onClick={handleAdd}
+          className={`flex-1 flex items-center justify-center gap-2 font-black py-3.5 rounded-2xl transition-all text-sm shadow-lg active:scale-[0.98]
+            ${added
+              ? 'bg-green-500 text-white shadow-green-500/20'
+              : 'bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white shadow-pink-500/20 hover:shadow-pink-500/30'
+            }`}>
+          {added ? (
+            <><Check size={16} /> Added to Cart</>
+          ) : (
+            <><ShoppingCart size={16} /> Add to Cart</>
+          )}
+        </button>
       </div>
 
-      {/* Add to cart */}
-      <button
-        onClick={handleAdd}
-        className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all ${
-          added
-            ? 'bg-green-500 text-white'
-            : 'bg-pink-500 hover:bg-pink-600 text-white shadow-lg hover:shadow-pink-200'
-        }`}
-      >
-        {added ? <><Check size={22} /> Added to Cart!</> : <><ShoppingCart size={22} /> Add to Cart</>}
-      </button>
-
-      {/* Buy now */}
-      {!added && (
-        <a
-          href="/checkout"
-          onClick={handleAdd}
-          className="block w-full py-4 rounded-2xl font-bold text-lg text-center border-2 border-gray-200 text-gray-700 hover:border-pink-300 hover:text-pink-600 transition-all"
-        >
-          Buy Now
-        </a>
+      {/* Total preview */}
+      {qty > 1 && (
+        <p className="text-xs text-gray-600 text-center">
+          {qty} magnets = <span className="text-white font-bold">${((product.price ?? 11.99) * qty).toFixed(2)}</span>
+        </p>
       )}
     </div>
   )

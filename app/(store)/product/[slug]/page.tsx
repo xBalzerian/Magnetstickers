@@ -14,20 +14,14 @@ async function getProduct(slug: string) {
   const { data } = await supabase
     .from('products')
     .select('*, categories(id, name, slug, parent_id, level)')
-    .eq('slug', slug)
-    .eq('is_active', true)
-    .single()
+    .eq('slug', slug).eq('is_active', true).single()
   return data
 }
 
 async function getRelated(categoryId: string, excludeId: string) {
-  const { data } = await supabase
-    .from('products')
-    .select('*')
-    .eq('category_id', categoryId)
-    .eq('is_active', true)
-    .neq('id', excludeId)
-    .limit(4)
+  const { data } = await supabase.from('products')
+    .select('*').eq('category_id', categoryId).eq('is_active', true)
+    .neq('id', excludeId).limit(8)
   return data ?? []
 }
 
@@ -44,106 +38,147 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound()
 
   const related = await getRelated(product.category_id, product.id)
+  const cat = product.categories as any
 
   return (
     <>
       <script type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product)) }} />
 
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8 flex-wrap">
-          <Link href="/shop" className="hover:text-pink-500">Shop</Link>
-          <span>/</span>
-          <Link href={`/shop/${(product.categories as any)?.slug}`} className="hover:text-pink-500">
-            {(product.categories as any)?.name}
-          </Link>
-          <span>/</span>
-          <span className="text-gray-900">{product.name}</span>
-        </nav>
+      <div className="min-h-screen bg-black text-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div className="space-y-4">
-            <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden border border-gray-100">
-              {product.images?.[0] ? (
-                <Image src={product.images[0]} alt={product.name}
-                  width={600} height={600} className="w-full h-full object-contain p-8"
-                  priority />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-8xl">🧲</div>
+          {/* Breadcrumb */}
+          <nav className="flex items-center gap-2 text-xs text-gray-600 mb-8 flex-wrap">
+            <Link href="/shop" className="hover:text-pink-400 transition-colors">Shop</Link>
+            <span>/</span>
+            {cat && (
+              <>
+                <Link href={`/shop/${cat.slug}`} className="hover:text-pink-400 transition-colors">{cat.name}</Link>
+                <span>/</span>
+              </>
+            )}
+            <span className="text-gray-500 truncate max-w-[200px]">{product.name}</span>
+          </nav>
+
+          {/* Product grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16 mb-16">
+
+            {/* Image */}
+            <div className="order-1">
+              <div className="relative aspect-square bg-gradient-to-br from-gray-900 to-gray-950 rounded-3xl overflow-hidden border border-white/8 shadow-2xl">
+                {product.images?.[0] ? (
+                  <Image src={product.images[0]} alt={product.name} fill priority
+                    className="object-contain p-8 sm:p-12"
+                    sizes="(max-width: 768px) 100vw, 50vw" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-700 text-sm">No image yet</div>
+                )}
+              </div>
+              {/* Thumbnail strip */}
+              {product.images?.length > 1 && (
+                <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+                  {product.images.map((img: string, i: number) => (
+                    <div key={i} className="w-16 h-16 rounded-xl overflow-hidden border border-white/10 flex-shrink-0">
+                      <Image src={img} alt={`${product.name} ${i+1}`} width={64} height={64} className="object-contain p-1 w-full h-full" />
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-            {product.images?.length > 1 && (
-              <div className="flex gap-3">
-                {product.images.slice(0, 4).map((img: string, i: number) => (
-                  <div key={i} className="w-20 h-20 bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
-                    <Image src={img} alt={`${product.name} ${i + 1}`} width={80} height={80} className="w-full h-full object-contain p-2" />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
-          <div>
-            <p className="text-sm text-pink-500 font-medium mb-2">{(product.categories as any)?.name}</p>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
-
-            {product.description && (
-              <p className="text-gray-600 mb-6 leading-relaxed">{product.description}</p>
-            )}
-
-            <div className="bg-gray-50 rounded-2xl p-5 mb-6 space-y-3">
-              {[
-                ['✂️', 'Die-Cut Shape', 'Precisely cut to your design — no square borders'],
-                ['🧲', '20mil Vinyl Magnet', 'Premium flexible vinyl, strong magnetic backing'],
-                ['🎨', 'Matte Finish', 'Vibrant full-color print that resists scratches'],
-                ['📦', 'Ships Worldwide', 'Printed & fulfilled by Printful'],
-              ].map(([icon, title, desc]) => (
-                <div key={title} className="flex items-start gap-3">
-                  <span className="text-xl">{icon}</span>
-                  <div>
-                    <span className="font-semibold text-sm">{title}</span>
-                    <span className="text-gray-500 text-sm"> — {desc}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <AddToCartButton product={product} />
-
-            {product.tags?.length > 0 && (
-              <div className="mt-6 flex flex-wrap gap-2">
-                {product.tags.map((tag: string) => (
-                  <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">#{tag}</span>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {related.length > 0 && (
-          <div className="mt-16">
-            <h2 className="text-2xl font-bold mb-6">You might also like</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
-              {related.map((rel: any) => (
-                <Link key={rel.id} href={`/product/${rel.slug}`}
-                  className="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all">
-                  <div className="aspect-square bg-gray-50">
-                    {rel.images?.[0] ? (
-                      <Image src={rel.images[0]} alt={rel.name} width={200} height={200}
-                        className="w-full h-full object-contain p-3 group-hover:scale-105 transition-transform" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl">🧲</div>
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <p className="text-sm font-medium line-clamp-2">{rel.name}</p>
-                    <p className="text-pink-600 font-bold text-sm mt-1">from $11.99</p>
-                  </div>
+            {/* Info */}
+            <div className="order-2 flex flex-col justify-start">
+              {cat && (
+                <Link href={`/shop/${cat.slug}`}
+                  className="text-xs font-bold text-pink-400 uppercase tracking-widest mb-3 hover:text-pink-300 transition-colors w-fit">
+                  {cat.name}
                 </Link>
-              ))}
+              )}
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-4 leading-tight">{product.name}</h1>
+
+              {/* Price */}
+              <div className="flex items-baseline gap-3 mb-6">
+                <span className="text-3xl sm:text-4xl font-black text-white">$11.99</span>
+                <span className="text-sm text-gray-600 line-through">$14.99</span>
+                <span className="text-xs bg-pink-500/20 text-pink-400 border border-pink-500/30 px-2 py-0.5 rounded-full font-bold">Save 20%</span>
+              </div>
+
+              {/* Specs */}
+              <div className="grid grid-cols-2 gap-2 mb-6">
+                {[
+                  ['Material', '20mil Premium Vinyl'],
+                  ['Type', 'Die-Cut Magnet'],
+                  ['Print', 'Full-Color UV Resistant'],
+                  ['Ships', '3-7 Business Days'],
+                ].map(([k, v]) => (
+                  <div key={k} className="bg-white/4 border border-white/8 rounded-xl p-3">
+                    <div className="text-xs text-gray-600 mb-0.5">{k}</div>
+                    <div className="text-xs font-semibold text-gray-300">{v}</div>
+                  </div>
+                ))}
+              </div>
+
+              {product.description && (
+                <p className="text-gray-500 text-sm leading-relaxed mb-6">{product.description}</p>
+              )}
+
+              {/* Add to cart */}
+              <AddToCartButton product={product} />
+
+              {/* Trust signals */}
+              <div className="mt-6 space-y-2">
+                {[
+                  'Free shipping on orders over $35',
+                  'Fulfilled by Printful — world-class quality',
+                  '30-day satisfaction guarantee',
+                  'Ships to 190+ countries worldwide',
+                ].map(t => (
+                  <div key={t} className="flex items-center gap-2.5 text-xs text-gray-600">
+                    <div className="w-1 h-1 rounded-full bg-green-500 flex-shrink-0" />
+                    {t}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        )}
+
+          {/* Related */}
+          {related.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl sm:text-2xl font-black">More Like This</h2>
+                {cat && (
+                  <Link href={`/shop/${cat.slug}`} className="text-xs text-pink-400 hover:text-pink-300 transition-colors font-semibold">
+                    View all in {cat.name}
+                  </Link>
+                )}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+                {related.map((p: any) => (
+                  <Link key={p.id} href={`/product/${p.slug}`}
+                    className="group bg-gray-950 rounded-2xl overflow-hidden border border-white/5 hover:border-pink-500/40 transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-pink-500/10">
+                    <div className="aspect-square bg-gradient-to-br from-gray-900 to-gray-950 relative overflow-hidden">
+                      {p.images?.[0] ? (
+                        <Image src={p.images[0]} alt={p.name} fill
+                          className="object-contain p-3 group-hover:scale-110 transition-transform duration-500"
+                          sizes="(max-width: 640px) 50vw, 17vw" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-full bg-white/5" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <p className="font-bold text-white text-xs line-clamp-2 mb-1">{p.name}</p>
+                      <p className="text-pink-400 font-black text-sm">$11.99</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </>
   )

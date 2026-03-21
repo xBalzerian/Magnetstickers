@@ -5,153 +5,181 @@ import Image from 'next/image'
 
 interface Props {
   bannerVideoUrl?: string | null
-  bannerImageUrl?: string | null
   featuredImages?: string[]
 }
 
-export default function AnimatedHero({ bannerVideoUrl, bannerImageUrl, featuredImages = [] }: Props) {
+// Floating sticker data — positions and animations
+const FLOATERS = [
+  { emoji: '🐶', size: 72, top: '8%',  left: '4%',  delay: 0,   duration: 6,  rotate: -15 },
+  { emoji: '🐱', size: 56, top: '15%', left: '88%', delay: 0.8, duration: 7,  rotate: 12 },
+  { emoji: '🦁', size: 80, top: '68%', left: '6%',  delay: 1.2, duration: 8,  rotate: -8 },
+  { emoji: '🍎', size: 52, top: '72%', left: '85%', delay: 0.4, duration: 6.5,rotate: 20 },
+  { emoji: '🦋', size: 44, top: '35%', left: '92%', delay: 2,   duration: 9,  rotate: -5 },
+  { emoji: '🐸', size: 60, top: '82%', left: '45%', delay: 1.6, duration: 7.5,rotate: 15 },
+  { emoji: '🌸', size: 48, top: '10%', left: '50%', delay: 0.6, duration: 8,  rotate: -20 },
+  { emoji: '🦊', size: 64, top: '55%', left: '2%',  delay: 2.4, duration: 6,  rotate: 10 },
+  { emoji: '🐼', size: 58, top: '25%', left: '78%', delay: 1,   duration: 7,  rotate: -12 },
+  { emoji: '🍕', size: 50, top: '48%', left: '95%', delay: 3,   duration: 8.5,rotate: 25 },
+  { emoji: '🐬', size: 55, top: '88%', left: '15%', delay: 1.8, duration: 6.5,rotate: -18 },
+  { emoji: '🌺', size: 42, top: '5%',  left: '70%', delay: 2.2, duration: 9,  rotate: 8  },
+]
+
+export default function AnimatedHero({ bannerVideoUrl, featuredImages = [] }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [videoReady, setVideoReady] = useState(false)
+  const [videoLoaded, setVideoLoaded] = useState(false)
 
   useEffect(() => {
-    if (videoRef.current) {
+    if (videoRef.current && bannerVideoUrl) {
       videoRef.current.play().catch(() => {})
     }
   }, [bannerVideoUrl])
 
   return (
-    <section className="relative min-h-[100svh] flex items-center overflow-hidden bg-black">
+    <section className="relative min-h-[92vh] flex items-center overflow-hidden bg-black">
 
-      {/* ── VIDEO LAYER (Kling animated banner, when available) ── */}
+      {/* ── VIDEO BACKGROUND (Kling 3.0 — when available) ── */}
       {bannerVideoUrl && (
         <video
           ref={videoRef}
           src={bannerVideoUrl}
-          autoPlay muted loop playsInline preload="auto"
-          onCanPlay={() => setVideoReady(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1500 ${videoReady ? 'opacity-50' : 'opacity-0'}`}
+          autoPlay muted loop playsInline
+          onLoadedData={() => setVideoLoaded(true)}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${videoLoaded ? 'opacity-40' : 'opacity-0'}`}
         />
       )}
 
-      {/* ── STATIC BANNER IMAGE (Nano Banana 2, fallback below video) ── */}
-      {bannerImageUrl && !videoReady && (
-        <Image
-          src={bannerImageUrl}
-          alt="Magnet Stickers Banner"
-          fill
-          priority
-          className="object-cover opacity-40"
-          sizes="100vw"
-        />
-      )}
-
-      {/* ── ANIMATED GRADIENT BG (always behind everything) ── */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-black" />
-        <div className="absolute top-0 left-0 w-full h-full">
-          {/* Animated gradient orbs */}
-          <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] bg-pink-900/30 rounded-full blur-[120px] animate-pulse-slow" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] bg-purple-900/25 rounded-full blur-[100px] animate-pulse-slower" />
-          <div className="absolute top-[30%] right-[20%] w-[30vw] h-[30vw] max-w-[400px] max-h-[400px] bg-indigo-900/20 rounded-full blur-[80px] animate-pulse-slow" />
-        </div>
+      {/* ── ANIMATED GRADIENT BACKGROUND (fallback / always shown) ── */}
+      <div className={`absolute inset-0 transition-opacity duration-1000 ${videoLoaded ? 'opacity-0' : 'opacity-100'}`}>
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-black to-purple-950" />
+        {/* Animated orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-pink-600/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-600/20 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '2s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
       </div>
 
-      {/* ── OVERLAY ── */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/80" />
+      {/* ── DARK OVERLAY on video ── */}
+      {bannerVideoUrl && <div className="absolute inset-0 bg-black/50" />}
 
-      {/* ── FLOATING PRODUCT IMAGES (real magnets when available) ── */}
-      {featuredImages.length > 0 && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden hidden md:block">
-          {featuredImages.slice(0, 8).map((img, i) => {
-            const placements = [
-              { top: '8%',  left: '3%',  size: 88, delay: 0,   dur: 7 },
-              { top: '60%', left: '2%',  size: 72, delay: 1.5, dur: 8 },
-              { top: '20%', right: '3%', size: 80, delay: 0.5, dur: 6 },
-              { top: '65%', right: '2%', size: 64, delay: 2,   dur: 9 },
-              { top: '40%', left: '1%',  size: 56, delay: 3,   dur: 7 },
-              { top: '35%', right: '1%', size: 60, delay: 1,   dur: 8 },
-              { top: '80%', left: '15%', size: 52, delay: 2.5, dur: 6 },
-              { top: '15%', right: '15%',size: 68, delay: 0.8, dur: 7 },
-            ]
-            const p = placements[i] ?? placements[0]
-            return (
-              <div key={i}
-                className="absolute rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-sm shadow-2xl"
-                style={{
-                  top: p.top,
-                  ...(('left' in p) ? { left: p.left } : {}),
-                  ...(('right' in p) ? { right: (p as any).right } : {}),
-                  width: p.size,
-                  height: p.size,
-                  animation: `floatY ${p.dur}s ease-in-out infinite`,
-                  animationDelay: `${p.delay}s`,
-                }}>
-                <Image src={img} alt="magnet" fill className="object-contain p-2" sizes="100px" />
-              </div>
-            )
-          })}
+      {/* ── FLOATING STICKERS ── */}
+      {FLOATERS.map((f, i) => (
+        <div
+          key={i}
+          className="absolute select-none pointer-events-none"
+          style={{
+            top: f.top,
+            left: f.left,
+            fontSize: `${f.size}px`,
+            animation: `float ${f.duration}s ease-in-out infinite`,
+            animationDelay: `${f.delay}s`,
+            transform: `rotate(${f.rotate}deg)`,
+            filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))',
+            zIndex: 2,
+          }}
+        >
+          {f.emoji}
         </div>
-      )}
+      ))}
+
+      {/* ── PRODUCT IMAGE FLOATERS (if we have real product images) ── */}
+      {featuredImages.slice(0, 6).map((img, i) => {
+        const positions = [
+          { top: '12%', left: '8%' }, { top: '65%', left: '12%' },
+          { top: '18%', left: '82%' }, { top: '70%', left: '80%' },
+          { top: '45%', left: '4%' }, { top: '40%', left: '90%' },
+        ]
+        const pos = positions[i] ?? { top: '50%', left: '50%' }
+        return (
+          <div
+            key={`img-${i}`}
+            className="absolute w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl"
+            style={{
+              top: pos.top,
+              left: pos.left,
+              animation: `float ${6 + i}s ease-in-out infinite`,
+              animationDelay: `${i * 0.5}s`,
+              zIndex: 3,
+            }}
+          >
+            <Image src={img} alt="magnet" fill className="object-contain p-1 bg-white/10" />
+          </div>
+        )
+      })}
 
       {/* ── MAIN CONTENT ── */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-28 text-center">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-20 text-center w-full">
 
-        {/* Eyebrow badge */}
-        <div className="inline-flex items-center gap-2.5 bg-white/8 backdrop-blur-md border border-white/12 text-white/80 text-xs sm:text-sm font-semibold px-4 sm:px-5 py-2 rounded-full mb-8 sm:mb-10">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          Ships to 190+ Countries &nbsp;&middot;&nbsp; Premium Die-Cut Quality
+        {/* Badge */}
+        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md text-white/90 text-sm font-bold px-5 py-2 rounded-full mb-8 border border-white/20 shadow-xl">
+          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+          🌍 Ships to 190+ Countries · Premium Die-Cut Quality
         </div>
 
-        {/* Headline — large on desktop, still big on mobile */}
-        <h1 className="font-black text-white leading-none tracking-tight mb-6 sm:mb-8
-          text-[2.8rem] sm:text-[4rem] md:text-[5.5rem] lg:text-[7rem] xl:text-[8rem]">
-          The World&rsquo;s<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-rose-400 to-purple-400">
-            Biggest
+        {/* Headline */}
+        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white leading-none mb-6 tracking-tight">
+          The World&apos;s
+          <br />
+          <span className="relative inline-block">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400">
+              Biggest
+            </span>
           </span>
           <br />
-          <span>Magnet Store</span>
+          <span className="text-white">Magnet Store</span>
         </h1>
 
-        {/* Sub headline */}
-        <p className="text-white/55 text-base sm:text-lg md:text-xl mb-10 sm:mb-12 max-w-xl sm:max-w-2xl mx-auto leading-relaxed">
-          Thousands of unique AI-illustrated die-cut magnet stickers — every breed, animal, fruit, quote and vibe.
-          <span className="block mt-1 text-pink-400/80 font-medium">Premium 20mil vinyl. Ships worldwide.</span>
+        {/* Sub */}
+        <p className="text-white/70 text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
+          Thousands of unique die-cut magnet stickers — every breed, animal, fruit, quote &amp; vibe.
+          <br className="hidden md:block" />
+          <span className="text-pink-400 font-semibold"> Premium 20mil vinyl · Vivid full-color · Ships worldwide.</span>
         </p>
 
-        {/* CTAs — stacked on mobile, side-by-side on sm+ */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-12 sm:mb-16">
+        {/* CTAs */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
           <Link href="/shop"
-            className="w-full sm:w-auto group relative overflow-hidden bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black py-4 sm:py-5 px-8 sm:px-12 rounded-2xl text-base sm:text-lg transition-all duration-300 shadow-2xl shadow-pink-500/30 hover:shadow-pink-500/50 hover:-translate-y-0.5 active:translate-y-0">
-            Shop All Magnets
+            className="group relative overflow-hidden bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-black py-5 px-10 rounded-2xl text-xl transition-all shadow-2xl hover:shadow-pink-500/50 hover:-translate-y-1 transform">
+            <span className="relative z-10">🛍️ Shop All Magnets</span>
+            <div className="absolute inset-0 bg-white/20 translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
           </Link>
           <Link href="/shop/animals-dogs"
-            className="w-full sm:w-auto bg-white/8 backdrop-blur-md hover:bg-white/15 text-white font-semibold py-4 sm:py-5 px-8 sm:px-12 rounded-2xl text-base sm:text-lg transition-all border border-white/15 hover:border-white/25 hover:-translate-y-0.5 active:translate-y-0">
-            Dog Breeds
+            className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white font-bold py-5 px-10 rounded-2xl text-xl transition-all border border-white/20 hover:-translate-y-1 transform shadow-xl">
+            🐶 Dog Breeds
           </Link>
         </div>
 
-        {/* Trust strip — scrollable on mobile */}
-        <div className="flex items-center justify-center gap-6 sm:gap-10 overflow-x-auto pb-1 scrollbar-none">
+        {/* Trust strip */}
+        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-white/50">
           {[
-            ['Die-Cut Precision', 'Every magnet cut to shape'],
-            ['AI-Illustrated Art', 'Exclusive unique designs'],
-            ['Printful Fulfilled', 'World-class production'],
-            ['4.9 Star Rating', 'Thousands of happy customers'],
-          ].map(([title, sub]) => (
-            <div key={title} className="flex flex-col items-center gap-0.5 shrink-0">
-              <span className="text-white/60 text-xs font-bold tracking-wide whitespace-nowrap">{title}</span>
-              <span className="text-white/25 text-xs whitespace-nowrap hidden sm:block">{sub}</span>
-            </div>
+            ['✂️', 'Die-Cut Precision'],
+            ['🎨', 'AI-Illustrated Art'],
+            ['📦', 'Fulfilled by Printful'],
+            ['⭐', '4.9 Star Rating'],
+            ['🔒', 'Secure Checkout'],
+          ].map(([icon, text]) => (
+            <span key={text} className="flex items-center gap-1.5">
+              <span>{icon}</span>
+              <span>{text}</span>
+            </span>
           ))}
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 text-white/25">
-        <div className="w-px h-8 bg-gradient-to-b from-transparent to-white/30" />
-        <span className="text-[10px] tracking-widest uppercase">Scroll</span>
+      {/* ── SCROLL INDICATOR ── */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 text-white/40 animate-bounce">
+        <span className="text-xs tracking-widest uppercase">Scroll</span>
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
+        </svg>
       </div>
+
+      {/* ── CSS ANIMATIONS ── */}
+      <style jsx global>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(var(--r, 0deg)); }
+          33%       { transform: translateY(-18px) rotate(calc(var(--r, 0deg) + 3deg)); }
+          66%       { transform: translateY(-8px) rotate(calc(var(--r, 0deg) - 3deg)); }
+        }
+      `}</style>
     </section>
   )
 }

@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Global resets ── */
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
@@ -10,43 +11,33 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  background-color: #000;
-  color: #fff;
+/* ── Float animation for hero stickers ── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-20px); }
 }
 
-/* Float animations */
-@keyframes floatY {
-  0%, 100% { transform: translateY(0px) rotate(-2deg); }
-  50%       { transform: translateY(-20px) rotate(2deg); }
-}
-
-@keyframes pulse-slow {
-  0%, 100% { opacity: 0.3; }
-  50%       { opacity: 0.6; }
-}
-
-@keyframes pulse-slower {
-  0%, 100% { opacity: 0.2; }
-  50%       { opacity: 0.45; }
-}
-
-.animate-pulse-slow   { animation: pulse-slow 5s ease-in-out infinite; }
-.animate-pulse-slower { animation: pulse-slower 8s ease-in-out infinite; }
-
-/* Shimmer skeleton */
+/* ── Shimmer loading skeleton ── */
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
-  100% { background-position:  200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #111 25%, #1a1a1a 50%, #111 75%);
+  background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
-/* Line clamp */
+/* ── Smooth page transitions ── */
+.page-enter { opacity: 0; transform: translateY(8px); }
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* ── Line clamp utility ── */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -54,18 +45,8 @@ body {
   overflow: hidden;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #0a0a0a; }
-::-webkit-scrollbar-thumb { background: #2d2d2d; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #ec4899; }
-
-/* Hide scrollbar utility */
-.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-.scrollbar-none::-webkit-scrollbar { display: none; }
-
-/* Touch tap highlight removal */
-* { -webkit-tap-highlight-color: transparent; }
-
-/* Transition duration extension */
-.duration-1500 { transition-duration: 1500ms; }
