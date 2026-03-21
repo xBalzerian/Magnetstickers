@@ -1,0 +1,13 @@
+{
+  "name": "Magnet Stickers",
+  "short_name": "MagnetStickers",
+  "description": "Unique die-cut magnet stickers for every passion",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#e91e8c",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
