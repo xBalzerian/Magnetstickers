@@ -1,5 +1,5 @@
 /**
- * KIE.ai API — correct endpoints confirmed from docs
+ * KIE.ai API
  *
  * Create task:   POST /api/v1/jobs/createTask
  * Check status:  GET  /api/v1/jobs/recordInfo?taskId=xxx
@@ -39,8 +39,6 @@ async function createTask(body: object): Promise<string> {
 }
 
 // ─── GET TASK STATUS ──────────────────────────────────────────────────────────
-// Correct endpoint: GET /api/v1/jobs/recordInfo?taskId=xxx
-// States: waiting | queuing | generating | success | fail
 export async function getTaskStatus(taskId: string): Promise<{
   state: string
   resultUrls?: string[]
@@ -54,7 +52,6 @@ export async function getTaskStatus(taskId: string): Promise<{
   const json = await res.json()
   const data = json?.data ?? {}
 
-  // resultJson is a JSON string containing { resultUrls: [...] }
   let resultUrls: string[] = []
   if (data.resultJson) {
     try {
@@ -79,7 +76,6 @@ export function extractVideoUrl(task: { resultUrls?: string[] }): string | null 
   return task.resultUrls?.[0] ?? null
 }
 
-// Legacy compat for existing generate route
 export function extractResultUrls(task: any): string[] {
   return task?.resultUrls ?? []
 }
@@ -97,11 +93,31 @@ export async function pollUntilDone(taskId: string, maxMs = 300_000, intervalMs 
 }
 
 // ─── Z-IMAGE — Sticker Generation ─────────────────────────────────────────────
+// Key: z-image ALWAYS needs "transparent background" + "no background" + "sticker" framing
 export async function generateStickerDesign(prompt: string, aspectRatio = '1:1'): Promise<string> {
-  const fullPrompt = `${prompt}, die-cut sticker design, crisp white outline border, isolated on transparent background, bold vibrant colors, professional illustration, clean sharp edges, print-ready`
+  const fullPrompt = [
+    prompt,
+    'die-cut sticker design',
+    'completely transparent background',
+    'no background',
+    'pure transparent PNG',
+    'crisp white outline border around subject',
+    'isolated subject only',
+    'bold vibrant colors',
+    'professional kawaii illustration',
+    'clean sharp edges',
+    'print-ready sticker',
+    'no shadow behind subject',
+    'no floor no ground no scene',
+  ].join(', ')
+
   return createTask({
     model: 'z-image',
-    input: { prompt: fullPrompt, aspect_ratio: aspectRatio, nsfw_checker: false },
+    input: {
+      prompt: fullPrompt,
+      aspect_ratio: aspectRatio,
+      nsfw_checker: false,
+    },
   })
 }
 
@@ -121,7 +137,7 @@ export async function animateBannerToVideo(imageUrl: string, prompt: string): Pr
   })
 }
 
-// Legacy alias used by existing /api/generate route
+// Legacy alias
 export async function generateImage(params: {
   prompt: string
   aspect_ratio?: string

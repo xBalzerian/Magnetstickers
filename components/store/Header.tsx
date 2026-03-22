@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { ShoppingBag, Menu, X, Search, ChevronDown } from 'lucide-react'
 import { getCartCount, getCart } from '@/lib/cart'
@@ -39,7 +40,7 @@ export default function Header() {
 
   return (
     <div className="sticky top-0 z-50">
-      {/* Announcement */}
+      {/* Announcement bar */}
       <div className="text-center py-2 px-4 text-xs font-semibold tracking-wide"
         style={{ background: '#1C1410', color: '#F5F0E8' }}>
         Free shipping on orders over $35 &nbsp;·&nbsp; Ships to 190+ countries &nbsp;·&nbsp; 100% satisfaction guarantee
@@ -53,15 +54,18 @@ export default function Header() {
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-6">
 
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm"
-              style={{ background: 'linear-gradient(135deg, #C8341A, #E85A20)' }}>
-              <span className="text-white font-black text-xs">M</span>
+          {/* Logo — actual brand logo image */}
+          <Link href="/" className="flex items-center shrink-0 group">
+            <div className="relative h-10 w-auto" style={{ aspectRatio: '1060/830' }}>
+              <Image
+                src="/logo.png"
+                alt="MagnetStickers.art"
+                width={140}
+                height={110}
+                className="object-contain h-10 w-auto group-hover:scale-105 transition-transform duration-200"
+                priority
+              />
             </div>
-            <span className="font-black text-[#1C1410] text-lg tracking-tight hidden sm:block">
-              Magnet<span style={{ color: '#C8341A' }}>Stickers</span>
-            </span>
           </Link>
 
           {/* Desktop nav */}
@@ -89,7 +93,7 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Right */}
+          {/* Right side */}
           <div className="flex items-center gap-2">
             <form onSubmit={handleSearch}
               className="hidden lg:flex items-center bg-[#EDE8DE] hover:bg-[#DDD7CB] border border-[#DDD7CB] rounded-xl px-3 py-2 gap-2 transition-colors focus-within:border-[#C8341A]/40">
