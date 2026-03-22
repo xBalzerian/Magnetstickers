@@ -2,112 +2,75 @@ import Link from 'next/link'
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-950 text-gray-400">
-      {/* Top section */}
-      <div className="max-w-7xl mx-auto px-4 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
+    <footer className="bg-black border-t border-white/5 text-white/40">
 
-        {/* Brand - spans 2 cols */}
+      {/* Marquee strip */}
+      <div className="border-y border-white/5 py-4 overflow-hidden">
+        <div className="flex whitespace-nowrap marquee-track gap-16 text-xs font-bold text-white/20 tracking-widest uppercase select-none">
+          {Array(4).fill(['Die-Cut Precision', 'Premium 20mil Vinyl', 'Ships Worldwide', 'AI-Illustrated Art', 'Printful Quality', '190+ Countries', 'Unique Designs', 'Free Returns']).flat().map((t, i) => (
+            <span key={i}>{t}</span>
+          ))}
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
+
+        {/* Brand */}
         <div className="lg:col-span-2">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-xl">🧲</span>
-            </div>
-            <div>
-              <span className="text-white font-black text-xl">Magnet</span>
-              <span className="text-pink-400 font-black text-xl">Stickers</span>
-            </div>
-          </div>
-          <p className="text-sm text-gray-400 leading-relaxed mb-5 max-w-xs">
-            The world&apos;s biggest die-cut magnet sticker store. Thousands of unique designs, 
-            premium quality, shipped to 190+ countries worldwide.
+          <Link href="/" className="flex items-center gap-3 mb-5 w-fit group">
+            <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg" />
+            <span className="font-black text-white text-lg tracking-tight">
+              Magnet<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">Stickers</span>
+            </span>
+          </Link>
+          <p className="text-sm text-white/30 leading-relaxed mb-6 max-w-xs">
+            The world's biggest die-cut magnet sticker store. Thousands of unique designs, premium quality, shipped worldwide.
           </p>
-          {/* Trust badges */}
           <div className="flex flex-wrap gap-2">
-            {['✂️ Die-Cut', '🎨 AI Art', '🌍 Worldwide', '🔒 Secure'].map(badge => (
-              <span key={badge} className="text-xs bg-white/5 border border-white/10 text-gray-400 px-3 py-1 rounded-full">
-                {badge}
-              </span>
+            {['Die-Cut', 'AI Art', 'Worldwide', 'Secure'].map(b => (
+              <span key={b} className="text-xs border border-white/8 text-white/25 px-3 py-1.5 rounded-full">{b}</span>
             ))}
           </div>
         </div>
 
         {/* Shop */}
         <div>
-          <h3 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">Shop</h3>
+          <h3 className="text-white/60 font-bold mb-4 text-xs uppercase tracking-widest">Shop</h3>
           <ul className="space-y-2.5 text-sm">
-            {[
-              ['All Magnets', '/shop'],
-              ['🐾 Animals', '/shop/animals'],
-              ['🐶 Dog Breeds', '/shop/animals-dogs'],
-              ['🐱 Cat Breeds', '/shop/animals-cats'],
-              ['🦁 Wildlife', '/shop/wildlife'],
-              ['🍎 Fruits', '/shop/fruits'],
-              ['🥦 Vegetables', '/shop/vegetables'],
-              ['💬 Quotes', '/shop/quotes'],
-              ['🍕 Food & Drinks', '/shop/food-drinks'],
-            ].map(([label, href]) => (
-              <li key={href}>
-                <Link href={href} className="hover:text-pink-400 transition-colors">{label}</Link>
-              </li>
+            {[['All Magnets','/shop'],['Animals','/shop/animals'],['Dog Breeds','/shop/animals-dogs'],['Wildlife','/shop/wildlife'],['Fruits','/shop/fruits'],['Vegetables','/shop/vegetables'],['Quotes','/shop/quotes']].map(([l,h]) => (
+              <li key={h}><Link href={h} className="text-white/35 hover:text-white transition-colors">{l}</Link></li>
             ))}
           </ul>
         </div>
 
-        {/* Support */}
+        {/* Info */}
         <div>
-          <h3 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">Support</h3>
+          <h3 className="text-white/60 font-bold mb-4 text-xs uppercase tracking-widest">Info</h3>
           <ul className="space-y-2.5 text-sm">
-            {[
-              ['Track My Order', '/order-tracking'],
-              ['Shipping & Delivery', '/shipping'],
-              ['Returns & Refunds', '/returns'],
-              ['FAQ', '/faq'],
-              ['Contact Us', '/contact'],
-              ['Size Guide', '/size-guide'],
-            ].map(([label, href]) => (
-              <li key={href}>
-                <Link href={href} className="hover:text-pink-400 transition-colors">{label}</Link>
-              </li>
+            {[['About Us','/about'],['Shipping Info','/shipping'],['Returns','/returns'],['FAQ','/faq'],['Contact','/contact'],['Track Order','/order-tracking']].map(([l,h]) => (
+              <li key={h}><Link href={h} className="text-white/35 hover:text-white transition-colors">{l}</Link></li>
             ))}
           </ul>
         </div>
 
-        {/* Info + Quality */}
+        {/* Quality */}
         <div>
-          <h3 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">Quality Promise</h3>
-          <ul className="space-y-3 text-sm">
-            {[
-              ['✂️', 'Perfect die-cut edge on every order'],
-              ['🧲', '20mil premium flexible vinyl magnet'],
-              ['🎨', 'Matte UV-resistant full-color print'],
-              ['📦', 'Fulfilled by Printful — trusted worldwide'],
-              ['🔄', 'Satisfaction guaranteed'],
-              ['⚡', 'Ships within 24–48 hours'],
-            ].map(([icon, text]) => (
-              <li key={text} className="flex items-start gap-2">
-                <span className="flex-shrink-0">{icon}</span>
-                <span>{text}</span>
-              </li>
+          <h3 className="text-white/60 font-bold mb-4 text-xs uppercase tracking-widest">Quality</h3>
+          <ul className="space-y-2.5 text-sm text-white/35">
+            {['20mil Premium Vinyl','Full-Color UV Print','Die-Cut Precision','Printful Production','30-Day Guarantee','Ships in 3-7 Days'].map(t => (
+              <li key={t}>{t}</li>
             ))}
           </ul>
         </div>
       </div>
 
-      {/* Bottom bar */}
-      <div className="border-t border-white/5 py-6 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-gray-600">
-            © {new Date().getFullYear()} MagnetStickers — All rights reserved · Fulfilled by Printful
-          </p>
-          <div className="flex items-center gap-5 text-xs text-gray-600">
-            <Link href="/privacy" className="hover:text-gray-400 transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-gray-400 transition-colors">Terms of Service</Link>
-            <Link href="/sitemap.xml" className="hover:text-gray-400 transition-colors">Sitemap</Link>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 bg-green-500 rounded-full" />
-              All systems operational
-            </span>
-          </div>
+      {/* Bottom */}
+      <div className="border-t border-white/5 px-4 sm:px-6 py-5 max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-white/20">
+        <span>© 2025 MagnetStickers.art — All rights reserved</span>
+        <div className="flex gap-5">
+          {[['Privacy','/privacy'],['Terms','/terms'],['Sitemap','/sitemap.xml']].map(([l,h]) => (
+            <Link key={h} href={h} className="hover:text-white/50 transition-colors">{l}</Link>
+          ))}
         </div>
       </div>
     </footer>

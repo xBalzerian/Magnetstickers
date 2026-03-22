@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Global resets ── */
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
@@ -11,33 +10,54 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Float animation for hero stickers ── */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-20px); }
+body {
+  background: #000;
+  color: #fff;
 }
 
-/* ── Shimmer loading skeleton ── */
+/* Float animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(var(--rot, 0deg)); }
+  33%       { transform: translateY(-14px) rotate(calc(var(--rot, 0deg) + 2deg)); }
+  66%       { transform: translateY(-6px) rotate(calc(var(--rot, 0deg) - 2deg)); }
+}
+
+/* Slow drift */
+@keyframes drift {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  25%       { transform: translateY(-20px) translateX(8px); }
+  50%       { transform: translateY(-10px) translateX(-5px); }
+  75%       { transform: translateY(-25px) translateX(3px); }
+}
+
+/* Subtle glow pulse */
+@keyframes glow {
+  0%, 100% { opacity: 0.3; }
+  50%       { opacity: 0.7; }
+}
+
+/* Shimmer skeleton */
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 
+/* Marquee */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 .skeleton {
-  background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+  background: linear-gradient(90deg, #111 25%, #1a1a1a 50%, #111 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
-/* ── Smooth page transitions ── */
-.page-enter { opacity: 0; transform: translateY(8px); }
-.page-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 300ms, transform 300ms;
+.marquee-track {
+  animation: marquee 30s linear infinite;
 }
 
-/* ── Line clamp utility ── */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -45,8 +65,11 @@ html {
   overflow: hidden;
 }
 
-/* ── Custom scrollbar ── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0a0a0a; }
-::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: #ec4899; }
+
+/* Selection */
+::selection { background: rgba(236, 72, 153, 0.3); color: #fff; }

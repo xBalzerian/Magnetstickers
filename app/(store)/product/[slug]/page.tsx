@@ -171,7 +171,7 @@ export default async function ProductPage({ params }: Props) {
                     </div>
                     <div className="p-3">
                       <p className="font-bold text-white text-xs line-clamp-2 mb-1">{p.name}</p>
-                      <p className="text-pink-400 font-black text-sm">$11.99</p>
+                      <p className="text-pink-400 font-black text-sm">${((p.price_cents ?? 1199)/100).toFixed(2)}</p>
                     </div>
                   </Link>
                 ))}

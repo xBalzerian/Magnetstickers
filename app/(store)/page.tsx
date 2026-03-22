@@ -8,249 +8,207 @@ import type { Category } from '@/types/database'
 import AnimatedHero from '@/components/store/AnimatedHero'
 
 export const metadata: Metadata = {
-  title: 'Magnet Stickers — The World\'s Biggest Die-Cut Magnet Store | Ships Worldwide',
+  title: "MagnetStickers — World's Largest Die-Cut Magnet Store | Ships Worldwide",
   description: 'Thousands of unique AI-illustrated die-cut magnet stickers. Dog breeds, cats, wildlife, fruits, quotes & more. Premium 20mil vinyl, vivid colors. Ships worldwide.',
-  openGraph: {
-    title: 'Magnet Stickers — The World\'s Biggest Die-Cut Magnet Store',
-    description: 'Thousands of unique designs. Ships worldwide. Premium quality.',
-    type: 'website',
-  },
 }
+
+// Hardcoded banner assets — Nano Banana 2 + Kling 2.6 animated
+const BANNER_VIDEO = "https://base44.app/api/apps/69bd2ede6bb1b2abf1f6b9ff/files/mp/public/69bd2ede6bb1b2abf1f6b9ff/3d42b7524_banner_video_1.mp4"
+const BANNER_IMAGE = "https://base44.app/api/apps/69bd2ede6bb1b2abf1f6b9ff/files/mp/public/69bd2ede6bb1b2abf1f6b9ff/3013a08c5_banner_1.jpg"
 
 async function getMainCategories(): Promise<Category[]> {
   const { data } = await supabase.from('categories').select('*').eq('level', 1).eq('is_active', true).order('sort_order').limit(12)
   return data ?? []
 }
 
-async function getFeaturedProducts() {
-  const { data } = await supabase.from('products').select('*, categories(name,slug)').eq('is_active', true).order('created_at', { ascending: false }).limit(12)
+async function getNewArrivals() {
+  const { data } = await supabase.from('products').select('*, categories(name,slug)').eq('is_active', true).order('created_at', { ascending: false }).limit(18)
   return data ?? []
 }
 
-async function getBannerVideoUrl(): Promise<string | null> {
-  // Check if we have a cached banner video stored in the DB settings
-  try {
-    const { data } = await supabase.from('settings').select('value').eq('key', 'banner_video_url').single()
-    return data?.value ?? null
-  } catch {
-    return null
-  }
-}
-
-const CAT_CONFIG: Record<string, { emoji: string; gradient: string; text: string }> = {
-  animals:       { emoji: '🐾', gradient: 'from-amber-500 to-orange-500',  text: 'text-white' },
-  fruits:        { emoji: '🍎', gradient: 'from-red-500 to-rose-500',      text: 'text-white' },
-  vegetables:    { emoji: '🥦', gradient: 'from-green-500 to-emerald-500', text: 'text-white' },
-  wildlife:      { emoji: '🦁', gradient: 'from-yellow-500 to-amber-500',  text: 'text-white' },
-  quotes:        { emoji: '💬', gradient: 'from-blue-500 to-indigo-500',   text: 'text-white' },
-  'food-drinks': { emoji: '🍕', gradient: 'from-orange-500 to-red-500',    text: 'text-white' },
-  nature:        { emoji: '🌿', gradient: 'from-teal-500 to-green-500',    text: 'text-white' },
-  hobbies:       { emoji: '🎮', gradient: 'from-purple-500 to-violet-500', text: 'text-white' },
-  spiritual:     { emoji: '🔮', gradient: 'from-violet-500 to-purple-600', text: 'text-white' },
-  seasonal:      { emoji: '🎄', gradient: 'from-pink-500 to-rose-500',     text: 'text-white' },
+const CAT_ACCENTS: Record<string, string> = {
+  animals:       'from-orange-900/40 to-amber-900/20 border-orange-500/20',
+  fruits:        'from-red-900/40 to-rose-900/20 border-red-500/20',
+  vegetables:    'from-green-900/40 to-emerald-900/20 border-green-500/20',
+  wildlife:      'from-yellow-900/40 to-amber-900/20 border-yellow-500/20',
+  quotes:        'from-blue-900/40 to-indigo-900/20 border-blue-500/20',
+  'food-drinks': 'from-orange-900/40 to-red-900/20 border-orange-500/20',
+  nature:        'from-teal-900/40 to-green-900/20 border-teal-500/20',
+  hobbies:       'from-purple-900/40 to-violet-900/20 border-purple-500/20',
+  spiritual:     'from-violet-900/40 to-purple-900/20 border-violet-500/20',
+  seasonal:      'from-pink-900/40 to-rose-900/20 border-pink-500/20',
 }
 
 export default async function HomePage() {
-  const [categories, featured, bannerVideoUrl] = await Promise.all([
+  const [categories, newArrivals] = await Promise.all([
     getMainCategories(),
-    getFeaturedProducts(),
-    getBannerVideoUrl(),
+    getNewArrivals(),
   ])
 
-  const featuredImages = featured.flatMap((p: any) => p.images ?? []).slice(0, 6)
+  const featuredImages = newArrivals.flatMap((p: any) => p.images ?? []).filter(Boolean).slice(0, 8)
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-black text-white">
 
-      {/* ── ANIMATED HERO ── */}
-      <AnimatedHero bannerVideoUrl={bannerVideoUrl} featuredImages={featuredImages} />
+      {/* HERO */}
+      <AnimatedHero bannerVideoUrl={BANNER_VIDEO} featuredImages={featuredImages} />
 
-      {/* ── STATS STRIP ── */}
-      <section className="bg-gradient-to-r from-pink-600 to-purple-700 text-white py-4">
-        <div className="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-center gap-6 md:gap-16 text-center">
+      {/* STATS STRIP */}
+      <section className="border-y border-white/5 bg-white/2 py-5">
+        <div className="max-w-6xl mx-auto px-4 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
           {[
             ['1,000+', 'Unique Designs'],
             ['190+', 'Countries Shipped'],
-            ['⭐ 4.9', 'Customer Rating'],
+            ['4.9', 'Star Rating'],
             ['20mil', 'Premium Vinyl'],
-            ['24h', 'Production Start'],
           ].map(([num, label]) => (
-            <div key={label} className="flex flex-col items-center">
-              <div className="text-xl md:text-2xl font-black">{num}</div>
-              <div className="text-xs text-white/70 mt-0.5">{label}</div>
+            <div key={label}>
+              <div className="text-2xl sm:text-3xl font-black text-white">{num}</div>
+              <div className="text-xs text-white/30 mt-0.5 uppercase tracking-widest font-medium">{label}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── CATEGORIES ── */}
-      <section className="py-24 px-4 bg-gray-950 text-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="bg-pink-500/20 text-pink-400 text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest">Collections</span>
-            <h2 className="text-4xl md:text-5xl font-black mt-4 mb-3">
-              Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">Perfect Magnet</span>
-            </h2>
-            <p className="text-gray-400 text-lg max-w-xl mx-auto">From your favorite dog breed to tropical fruits — there&apos;s a magnet for everything</p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {categories.map(cat => {
-              const cfg = CAT_CONFIG[cat.slug] ?? { emoji: '🏷️', gradient: 'from-gray-600 to-gray-700', text: 'text-white' }
-              return (
-                <Link key={cat.id} href={`/shop/${cat.slug}`}
-                  className="group relative overflow-hidden rounded-2xl aspect-square hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${cfg.gradient} opacity-90 group-hover:opacity-100 transition-opacity`} />
-                  <div className="relative z-10 h-full flex flex-col items-center justify-center p-4">
-                    <div className="text-5xl mb-3 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">{cfg.emoji}</div>
-                    <div className={`font-black text-sm text-center ${cfg.text} drop-shadow-md`}>{cat.name}</div>
-                    <div className="mt-2 text-white/60 text-xs opacity-0 group-hover:opacity-100 transition-opacity">Shop now →</div>
-                  </div>
-                </Link>
-              )
-            })}
-
-            {/* All categories tile */}
-            <Link href="/shop"
-              className="group relative overflow-hidden rounded-2xl aspect-square hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 border-2 border-dashed border-white/20" />
-              <div className="relative z-10 h-full flex flex-col items-center justify-center p-4">
-                <div className="text-5xl mb-3">✨</div>
-                <div className="font-black text-sm text-center text-white">All Collections</div>
-                <div className="mt-1 text-white/50 text-xs">100+ categories</div>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── NEW ARRIVALS ── */}
-      {featured.length > 0 && (
-        <section className="py-24 px-4 bg-black">
+      {/* CATEGORIES */}
+      {categories.length > 0 && (
+        <section className="py-20 sm:py-28 px-4">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-14">
-              <span className="bg-yellow-500/20 text-yellow-400 text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest">Just Dropped 🔥</span>
-              <h2 className="text-4xl md:text-5xl font-black mt-4 mb-3 text-white">New Arrivals</h2>
-              <p className="text-gray-500 text-lg">Fresh AI-illustrated designs — added daily</p>
+            <div className="mb-12">
+              <p className="text-xs font-bold text-white/30 uppercase tracking-[0.3em] mb-3">Collections</p>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black">
+                Find Your{' '}
+                <span className="text-transparent bg-clip-text"
+                  style={{ backgroundImage: 'linear-gradient(135deg, #f472b6, #a855f7)' }}>
+                  Perfect Magnet
+                </span>
+              </h2>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {featured.map((product: any) => (
-                <Link key={product.id} href={`/product/${product.slug}`}
-                  className="group bg-gray-900 rounded-2xl overflow-hidden border border-white/5 hover:border-pink-500/50 hover:shadow-2xl hover:shadow-pink-500/10 hover:-translate-y-2 transition-all duration-300">
-                  <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900">
-                    {product.images?.[0] ? (
-                      <Image src={product.images[0]} alt={product.name} fill
-                        className="object-contain p-3 group-hover:scale-110 transition-transform duration-500"
-                        sizes="(max-width: 640px) 50vw, 20vw" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-5xl">🧲</div>
-                    )}
-                    <div className="absolute top-2 left-2 bg-pink-500 text-white text-xs font-black px-2 py-0.5 rounded-full">NEW</div>
-                  </div>
-                  <div className="p-3">
-                    <p className="text-xs text-pink-400 font-semibold mb-1 uppercase tracking-wide truncate">{product.categories?.name}</p>
-                    <h3 className="font-bold text-white text-xs line-clamp-2 leading-snug">{product.name}</h3>
-                    <p className="text-pink-400 font-black text-sm mt-2">$11.99</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+              {categories.map(cat => {
+                const accent = CAT_ACCENTS[cat.slug] ?? 'from-gray-900/60 to-gray-900/30 border-white/10'
+                return (
+                  <Link key={cat.id} href={`/shop/${cat.slug}`}
+                    className={`group relative rounded-2xl aspect-[4/3] overflow-hidden border bg-gradient-to-br ${accent} hover:border-pink-500/40 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-pink-500/10 active:scale-[0.98]`}>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-5">
+                      <div className="font-black text-base sm:text-lg text-white mb-1.5 text-center leading-tight">{cat.name}</div>
+                      <div className="text-xs text-white/30 font-medium">Explore</div>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                  </Link>
+                )
+              })}
 
-            <div className="text-center mt-12">
+              {/* All collections */}
               <Link href="/shop"
-                className="inline-flex items-center gap-2 bg-white text-gray-900 hover:bg-pink-500 hover:text-white font-black py-4 px-10 rounded-2xl text-lg transition-all shadow-xl hover:shadow-pink-500/30">
-                View All Products →
+                className="group relative rounded-2xl aspect-[4/3] overflow-hidden border border-dashed border-white/10 hover:border-pink-500/30 bg-white/2 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-5">
+                  <div className="font-black text-base sm:text-lg text-white/60 group-hover:text-white mb-1.5 transition-colors">All Collections</div>
+                  <div className="text-xs text-white/25">100+ categories</div>
+                </div>
               </Link>
             </div>
           </div>
         </section>
       )}
 
-      {/* ── PRINTFUL QUALITY SECTION ── */}
-      <section className="py-24 px-4 bg-gray-950 text-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <span className="bg-white/10 text-white/70 text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest">Printful Quality</span>
-              <h2 className="text-4xl md:text-5xl font-black mt-4 mb-6 leading-tight">
-                Every Magnet is a<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">Work of Art</span>
-              </h2>
-              <p className="text-gray-400 text-lg leading-relaxed mb-8">
-                Our die-cut magnets are produced by Printful — the world&apos;s leading print-on-demand company.
-                Every order is printed on demand using professional-grade equipment.
-              </p>
-              <div className="space-y-4">
-                {[
-                  { icon: '✂️', title: 'Die-Cut to Exact Shape', desc: 'Precision cut to the exact outline of each design — no rectangular borders' },
-                  { icon: '🎨', title: '20mil Premium Vinyl', desc: 'Thick, durable flexible vinyl with strong magnetic backing. Lasts for years.' },
-                  { icon: '🖨️', title: '150+ DPI Print Quality', desc: 'Vivid, full-color printing at professional resolution — every detail sharp' },
-                  { icon: '📐', title: 'Printful Spec Compliant', desc: 'All designs prepared with 3mm bleed, safe zones, and proper color profiles' },
-                ].map(item => (
-                  <div key={item.title} className="flex items-start gap-4 bg-white/5 rounded-xl p-4 border border-white/10">
-                    <span className="text-2xl flex-shrink-0">{item.icon}</span>
-                    <div>
-                      <div className="font-bold text-white text-sm">{item.title}</div>
-                      <div className="text-gray-500 text-xs mt-0.5">{item.desc}</div>
-                    </div>
-                  </div>
-                ))}
+      {/* NEW ARRIVALS */}
+      {newArrivals.length > 0 && (
+        <section className="py-20 sm:py-28 px-4 border-t border-white/5">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-end justify-between mb-12">
+              <div>
+                <p className="text-xs font-bold text-white/30 uppercase tracking-[0.3em] mb-3">Just Dropped</p>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">New Arrivals</h2>
               </div>
+              <Link href="/shop"
+                className="hidden sm:inline-flex items-center gap-2 text-sm text-white/40 hover:text-white border border-white/10 hover:border-white/25 px-4 py-2 rounded-xl transition-all">
+                View all
+                <span className="text-white/20">→</span>
+              </Link>
             </div>
 
-            {/* Visual — magnet showcase */}
-            <div className="relative">
-              <div className="grid grid-cols-3 gap-3">
-                {featured.slice(0, 9).map((p: any, i: number) => (
-                  <div key={p.id}
-                    className={`rounded-2xl overflow-hidden border border-white/10 aspect-square bg-gray-900 ${i === 4 ? 'border-pink-500 shadow-lg shadow-pink-500/30 scale-110 z-10' : ''}`}>
-                    {p.images?.[0] ? (
-                      <Image src={p.images[0]} alt={p.name} width={150} height={150} className="w-full h-full object-contain p-2" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+              {newArrivals.map((product: any) => (
+                <Link key={product.id} href={`/product/${product.slug}`}
+                  className="group bg-white/3 hover:bg-white/5 rounded-2xl overflow-hidden border border-white/5 hover:border-pink-500/30 hover:-translate-y-1 hover:shadow-2xl hover:shadow-pink-500/10 transition-all duration-300 active:scale-[0.97]">
+                  <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-white/3 to-transparent">
+                    {product.images?.[0] ? (
+                      <Image src={product.images[0]} alt={product.name} fill
+                        className="object-contain p-3 group-hover:scale-108 transition-transform duration-500"
+                        sizes="(max-width: 640px) 50vw, 20vw" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-3xl">🧲</div>
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full border border-white/8 bg-white/3" />
+                      </div>
                     )}
+                    <div className="absolute top-2 left-2 bg-pink-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full tracking-wide">NEW</div>
                   </div>
-                ))}
-                {featured.length < 9 && Array.from({ length: 9 - featured.length }).map((_, i) => (
-                  <div key={`ph-${i}`} className="rounded-2xl bg-white/5 border border-white/5 aspect-square flex items-center justify-center text-3xl text-white/20">🧲</div>
-                ))}
-              </div>
-              {/* Floating label */}
-              <div className="absolute -bottom-4 -right-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black px-4 py-2 rounded-xl text-sm shadow-xl">
-                Fulfilled by Printful ✓
-              </div>
+                  <div className="p-3">
+                    {product.categories?.name && (
+                      <p className="text-[10px] text-pink-400/70 font-bold uppercase tracking-widest mb-1 truncate">{product.categories.name}</p>
+                    )}
+                    <h3 className="font-bold text-white text-xs sm:text-sm line-clamp-2 leading-snug mb-2">{product.name}</h3>
+                    <p className="text-white font-black text-sm">${((product.price_cents ?? 1199)/100).toFixed(2)}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            <div className="text-center mt-10 sm:hidden">
+              <Link href="/shop"
+                className="inline-flex items-center gap-2 border border-white/10 text-white/60 hover:text-white hover:border-white/25 font-semibold py-3 px-8 rounded-xl transition-all text-sm">
+                View all magnets
+              </Link>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* ── HOW IT WORKS ── */}
-      <section className="py-24 px-4 bg-black text-white">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="bg-blue-500/20 text-blue-400 text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest">How It Works</span>
-            <h2 className="text-4xl md:text-5xl font-black mt-4 text-white">From Click to Fridge 🧲</h2>
-          </div>
-          <div className="relative">
-            {/* Connector line */}
-            <div className="hidden md:block absolute top-10 left-1/8 right-1/8 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 opacity-30" style={{left: '12.5%', right: '12.5%'}} />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              {[
-                { step: '01', icon: '🔍', title: 'Browse 1,000+ designs', desc: 'Find the perfect magnet from our massive collection' },
-                { step: '02', icon: '🛒', title: 'Add to cart', desc: 'Pick your quantity — order 1 or 100' },
-                { step: '03', icon: '💳', title: 'Secure checkout', desc: 'Pay with PayPal or major credit card — 100% secure' },
-                { step: '04', icon: '📬', title: 'Delivered to you', desc: 'Printed & shipped by Printful in 3–7 business days' },
-              ].map((item) => (
-                <div key={item.step} className="relative text-center">
-                  <div className="relative inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-white/10 rounded-2xl mb-4">
-                    <span className="text-3xl">{item.icon}</span>
-                    <div className="absolute -top-2 -right-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-black w-6 h-6 rounded-full flex items-center justify-center">
-                      {item.step}
-                    </div>
+      {/* QUALITY SECTION */}
+      <section className="py-20 sm:py-28 px-4 border-t border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div>
+              <p className="text-xs font-bold text-white/30 uppercase tracking-[0.3em] mb-4">Printful Quality</p>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-6">
+                Every Magnet is a<br />
+                <span className="text-transparent bg-clip-text"
+                  style={{ backgroundImage: 'linear-gradient(135deg, #f472b6, #a855f7)' }}>
+                  Work of Art
+                </span>
+              </h2>
+              <p className="text-white/40 text-base leading-relaxed mb-8 max-w-md">
+                Printed on premium 20mil vinyl with UV-resistant ink that stays vivid for years. Die-cut to exact shape, every edge is perfect.
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  ['20mil Vinyl', 'Thick, durable premium material'],
+                  ['UV Resistant', 'Colors stay vivid for years'],
+                  ['Die-Cut', 'Precision-cut to exact shape'],
+                  ['Worldwide', 'Ships to 190+ countries'],
+                ].map(([title, desc]) => (
+                  <div key={title} className="bg-white/3 border border-white/8 rounded-2xl p-4">
+                    <div className="font-black text-white text-sm mb-1">{title}</div>
+                    <div className="text-xs text-white/30 leading-snug">{desc}</div>
                   </div>
-                  <h3 className="font-bold text-white mb-2 text-sm">{item.title}</h3>
-                  <p className="text-gray-600 text-xs leading-relaxed">{item.desc}</p>
+                ))}
+              </div>
+            </div>
+
+            {/* Visual stats */}
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { value: '1,000+', label: 'Unique designs in store' },
+                { value: '$11.99', label: 'Starting price per magnet' },
+                { value: '3-7', label: 'Business days to your door' },
+                { value: '4.9★', label: 'Average customer rating' },
+              ].map(s => (
+                <div key={s.label}
+                  className="bg-white/3 border border-white/8 rounded-3xl p-6 flex flex-col justify-between aspect-square">
+                  <div className="text-3xl sm:text-4xl font-black text-white">{s.value}</div>
+                  <div className="text-xs text-white/30 leading-snug">{s.label}</div>
                 </div>
               ))}
             </div>
@@ -258,57 +216,31 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
-      <section className="py-24 px-4 bg-gray-950 text-white">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-black mb-3">People Are Obsessed 🧲</h2>
-          <p className="text-gray-500 mb-14 text-lg">Thousands of happy customers worldwide</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { quote: 'Ordered the Shih Tzu magnet for my mom and she literally cried. The detail is unreal. Already ordered 12 more designs.', name: 'Jessica M.', country: '🇺🇸 USA', stars: 5 },
-              { quote: 'Ships super fast to the Philippines! The die-cut quality is insane — looks exactly like my golden retriever. My fridge is full now lol.', name: 'Carlo R.', country: '🇵🇭 Philippines', stars: 5 },
-              { quote: 'I have 40+ on my fridge. My friends always ask where I got them. This store is genuinely the best thing I\'ve found online.', name: 'Sarah K.', country: '🇬🇧 UK', stars: 5 },
-            ].map(t => (
-              <div key={t.name} className="bg-white/5 border border-white/10 rounded-2xl p-6 text-left hover:bg-white/8 transition-colors">
-                <div className="flex gap-0.5 mb-4">
-                  {Array(t.stars).fill(0).map((_, i) => <span key={i} className="text-yellow-400 text-lg">★</span>)}
-                </div>
-                <p className="text-gray-300 text-sm leading-relaxed mb-5">&ldquo;{t.quote}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-black text-sm">
-                    {t.name[0]}
-                  </div>
-                  <div>
-                    <div className="font-bold text-white text-sm">{t.name}</div>
-                    <div className="text-xs text-gray-500">{t.country}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
+      {/* CTA BANNER */}
+      <section className="py-20 sm:py-28 px-4 border-t border-white/5">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-xs font-bold text-white/30 uppercase tracking-[0.3em] mb-4">Ready to start?</p>
+          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight">
+            Find the perfect magnet<br />
+            <span className="text-transparent bg-clip-text"
+              style={{ backgroundImage: 'linear-gradient(135deg, #f472b6, #a855f7, #6366f1)' }}>
+              for every moment
+            </span>
+          </h2>
+          <p className="text-white/30 text-base mb-10">From refrigerator art to locker decor — something for everyone.</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/shop"
+              className="group relative overflow-hidden bg-white text-black font-black py-4 px-12 rounded-2xl text-base transition-all hover:scale-[1.02] shadow-2xl active:scale-[0.98]">
+              <span className="relative z-10 group-hover:text-white transition-colors duration-300">Shop All Magnets</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-600 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+            </Link>
+            <Link href="/shop/animals-dogs"
+              className="border border-white/10 hover:border-white/25 text-white/70 hover:text-white font-bold py-4 px-12 rounded-2xl text-base transition-all hover:scale-[1.02] hover:bg-white/5 active:scale-[0.98]">
+              Dog Breeds
+            </Link>
           </div>
         </div>
       </section>
-
-      {/* ── FINAL CTA ── */}
-      <section className="py-24 px-4 bg-black text-white text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-pink-600/10 via-purple-600/10 to-pink-600/10 animate-pulse" style={{ animationDuration: '4s' }} />
-        <div className="relative max-w-3xl mx-auto">
-          <div className="text-6xl mb-6">🧲</div>
-          <h2 className="text-4xl md:text-6xl font-black mb-4 leading-tight">
-            Ready to<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
-              Magnify Your World?
-            </span>
-          </h2>
-          <p className="text-gray-400 text-xl mb-10">Thousands of designs waiting for you. Ships to your door, anywhere on Earth.</p>
-          <Link href="/shop"
-            className="inline-block bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-black py-5 px-14 rounded-2xl text-2xl transition-all shadow-2xl hover:shadow-pink-500/40 hover:-translate-y-1 transform">
-            🛍️ Start Shopping
-          </Link>
-          <p className="text-gray-600 text-sm mt-5">Free shipping on orders over $35 · Ships to 190+ countries</p>
-        </div>
-      </section>
-
     </div>
   )
 }

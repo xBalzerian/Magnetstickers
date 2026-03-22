@@ -10,6 +10,7 @@ interface Props {
     slug: string
     images?: string[]
     price?: number
+    price_cents?: number
   }
 }
 
@@ -22,7 +23,7 @@ export default function AddToCartButton({ product }: Props) {
       id: product.id,
       name: product.name,
       slug: product.slug,
-      price: product.price ?? 11.99,
+      price: (product.price_cents ?? (product.price ?? 11.99) * 100) / 100,
       image: product.images?.[0] ?? null,
       quantity: qty,
     })
@@ -65,7 +66,7 @@ export default function AddToCartButton({ product }: Props) {
       {/* Total preview */}
       {qty > 1 && (
         <p className="text-xs text-gray-600 text-center">
-          {qty} magnets = <span className="text-white font-bold">${((product.price ?? 11.99) * qty).toFixed(2)}</span>
+          {qty} magnets = <span className="text-white font-bold">${(((product.price_cents ?? 1199) / 100) * qty).toFixed(2)}</span>
         </p>
       )}
     </div>

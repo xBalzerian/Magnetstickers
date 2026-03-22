@@ -178,7 +178,7 @@ export default async function ShopPage({ params, searchParams }: PageProps) {
                       <p className="text-[10px] text-pink-400 font-bold uppercase tracking-wide mb-0.5 truncate">{p.categories.name}</p>
                     )}
                     <h3 className="font-bold text-white text-xs sm:text-sm line-clamp-2 leading-snug mb-1.5">{p.name}</h3>
-                    <p className="text-pink-400 font-black text-sm">$11.99</p>
+                    <p className="text-pink-400 font-black text-sm">${((p.price_cents ?? 1199)/100).toFixed(2)}</p>
                   </div>
                 </Link>
               ))}
