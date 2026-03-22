@@ -2,138 +2,153 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react'
-import { getCart, updateQuantity, removeFromCart, getCartTotal, type CartItem } from '@/lib/cart'
+import { getCart, saveCart, updateQuantity, removeFromCart, getCartTotal, applyBogo, type CartItem } from '@/lib/cart'
 
 export default function CartPage() {
   const [cart, setCart] = useState<CartItem[]>([])
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    const update = () => setCart(getCart())
-    update()
-    window.addEventListener('cart-updated', update)
-    return () => window.removeEventListener('cart-updated', update)
+    setMounted(true)
+    const load = () => setCart(getCart())
+    load()
+    window.addEventListener('cart-updated', load)
+    return () => window.removeEventListener('cart-updated', load)
   }, [])
 
-  const total = getCartTotal(cart)
+  if (!mounted) return <div className="min-h-screen" style={{ background: '#F5F0E8' }} />
 
-  if (cart.length === 0) return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
-      <div className="text-center max-w-sm">
-        <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-3xl mx-auto mb-6 flex items-center justify-center">
-          <ShoppingBag size={32} className="text-gray-600" />
-        </div>
-        <h1 className="text-2xl font-black mb-3">Your cart is empty</h1>
-        <p className="text-gray-600 text-sm mb-8 leading-relaxed">You haven&apos;t added any magnets yet. Browse our collection to find your perfect design.</p>
-        <Link href="/shop"
-          className="inline-flex items-center gap-2 bg-pink-500 hover:bg-pink-400 text-white font-black py-4 px-8 rounded-2xl transition-all shadow-lg shadow-pink-500/20 text-sm">
-          Browse Magnets
-        </Link>
-      </div>
-    </div>
-  )
+  const subtotal = getCartTotal(cart)
+  const totalQty = cart.reduce((s, i) => s + i.quantity, 0)
+  const { discount } = applyBogo(cart)
+  const afterDiscount = subtotal - discount
+  const shipping = afterDiscount >= 35 ? 0 : 4.95
+  const orderTotal = afterDiscount + shipping
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div style={{ background: '#F5F0E8', color: '#1C1410', minHeight: '100vh' }}>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link href="/shop" className="text-gray-600 hover:text-gray-300 transition-colors">
-            <ArrowLeft size={20} />
-          </Link>
-          <h1 className="text-2xl sm:text-3xl font-black">
-            Shopping Cart
-            <span className="text-base font-normal text-gray-600 ml-3">({cart.length} item{cart.length !== 1 ? 's' : ''})</span>
-          </h1>
-        </div>
+        <h1 className="text-2xl sm:text-3xl font-black mb-8">Your Cart</h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        {cart.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-5xl mb-4">🛒</p>
+            <h2 className="font-black text-xl mb-2">Your cart is empty</h2>
+            <p className="opacity-40 text-sm mb-6">Add some magnets to get started!</p>
+            <Link href="/shop" className="inline-flex font-bold py-3 px-8 rounded-xl text-sm text-white transition-all hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg, #C8341A, #E85A20)' }}>
+              Shop All Magnets
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* Items */}
-          <div className="lg:col-span-2 space-y-3">
-            {cart.map(item => (
-              <div key={item.id} className="bg-gray-950 border border-white/8 rounded-2xl p-4 sm:p-5 flex gap-4">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl overflow-hidden flex-shrink-0 relative border border-white/5">
-                  {item.image ? (
-                    <Image src={item.image} alt={item.name} fill className="object-contain p-2" sizes="96px" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className="w-8 h-8 rounded-full bg-white/5" />
+            {/* Cart items */}
+            <div className="lg:col-span-2 space-y-3">
+
+              {/* BOGO banner */}
+              {totalQty >= 4 && discount > 0 ? (
+                <div className="rounded-2xl p-4 border flex items-center gap-3 mb-4" style={{ background: '#FFF8F0', borderColor: '#F0C090' }}>
+                  <div className="text-2xl">🎉</div>
+                  <div>
+                    <p className="font-black text-sm" style={{ color: '#C8341A' }}>Buy 3 Get 1 Free — Applied!</p>
+                    <p className="text-xs opacity-50">You saved ${discount.toFixed(2)} on your cheapest item{Math.floor(totalQty/4) > 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+              ) : totalQty < 4 ? (
+                <div className="rounded-2xl p-4 border mb-4" style={{ background: '#EDE8DE', borderColor: '#DDD7CB' }}>
+                  <p className="text-sm font-bold" style={{ color: '#C8341A' }}>
+                    Add {4 - totalQty} more magnet{4 - totalQty !== 1 ? 's' : ''} to get 1 FREE! 🎁
+                  </p>
+                  <Link href="/shop" className="text-xs opacity-50 hover:opacity-80 transition-opacity">Browse more →</Link>
+                </div>
+              ) : null}
+
+              {cart.map(item => (
+                <div key={item.id} className="flex gap-4 p-4 rounded-2xl border"
+                  style={{ background: '#FBF8F3', borderColor: '#E5DFD5' }}>
+                  <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border"
+                    style={{ background: 'linear-gradient(135deg, #EDE8DE, #E5DFD5)', borderColor: '#DDD7CB' }}>
+                    {item.image && (
+                      <Image src={item.image} alt={item.name} width={80} height={80}
+                        className="object-contain p-1.5 w-full h-full" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-sm leading-snug mb-0.5 truncate">{item.name}</h3>
+                    {item.size && (
+                      <p className="text-xs opacity-40 mb-2">{item.size} ({item.sizeDims})</p>
+                    )}
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center border rounded-lg overflow-hidden" style={{ borderColor: '#DDD7CB' }}>
+                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="px-2.5 py-1.5 text-sm font-bold hover:opacity-60 transition-opacity">−</button>
+                        <span className="px-2 text-sm font-black" style={{ minWidth: '1.5rem', textAlign: 'center' }}>{item.quantity}</span>
+                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="px-2.5 py-1.5 text-sm font-bold hover:opacity-60 transition-opacity">+</button>
+                      </div>
+                      <button onClick={() => removeFromCart(item.id)}
+                        className="text-xs opacity-30 hover:opacity-60 transition-opacity">Remove</button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end justify-between shrink-0">
+                    <p className="font-black text-sm" style={{ color: '#C8341A' }}>
+                      ${((item.price ?? item.priceCents / 100) * item.quantity).toFixed(2)}
+                    </p>
+                    <p className="text-[10px] opacity-30">${(item.price ?? item.priceCents / 100).toFixed(2)} each</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Order summary */}
+            <div>
+              <div className="rounded-2xl p-6 border sticky top-20" style={{ background: '#FBF8F3', borderColor: '#E5DFD5' }}>
+                <h2 className="font-black text-base mb-5">Order Summary</h2>
+                <div className="space-y-3 text-sm mb-5">
+                  <div className="flex justify-between">
+                    <span className="opacity-50">Subtotal ({totalQty} item{totalQty !== 1 ? 's' : ''})</span>
+                    <span className="font-semibold">${subtotal.toFixed(2)}</span>
+                  </div>
+                  {discount > 0 && (
+                    <div className="flex justify-between" style={{ color: '#C8341A' }}>
+                      <span className="font-bold">Buy 3 Get 1 Free</span>
+                      <span className="font-black">−${discount.toFixed(2)}</span>
                     </div>
                   )}
+                  <div className="flex justify-between">
+                    <span className="opacity-50">Shipping</span>
+                    <span className="font-semibold">{shipping === 0 ? <span style={{ color: '#2E8B57' }}>FREE</span> : `$${shipping.toFixed(2)}`}</span>
+                  </div>
+                  {shipping > 0 && (
+                    <p className="text-[10px] opacity-35">Add ${(35 - afterDiscount).toFixed(2)} more for free shipping</p>
+                  )}
+                  <div className="border-t pt-3 flex justify-between font-black text-base" style={{ borderColor: '#DDD7CB' }}>
+                    <span>Total</span>
+                    <span style={{ color: '#C8341A' }}>${orderTotal.toFixed(2)}</span>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-white text-sm sm:text-base leading-snug line-clamp-2 mb-0.5">{item.name}</h3>
-                  <p className="text-xs text-gray-600 mb-3">Die-Cut Magnet Sticker</p>
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl p-1">
-                      <button onClick={() => { updateQuantity(item.id, item.quantity - 1); setCart(getCart()) }}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white">
-                        <Minus size={13} />
-                      </button>
-                      <span className="text-sm font-bold text-white min-w-[20px] text-center">{item.quantity}</span>
-                      <button onClick={() => { updateQuantity(item.id, item.quantity + 1); setCart(getCart()) }}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white">
-                        <Plus size={13} />
-                      </button>
+                <Link href="/checkout"
+                  className="w-full flex items-center justify-center font-black py-4 rounded-xl text-white transition-all hover:opacity-90 shadow-md"
+                  style={{ background: 'linear-gradient(135deg, #C8341A, #E85A20)', boxShadow: '0 4px 16px rgba(200,52,26,0.3)' }}>
+                  Checkout →
+                </Link>
+                <Link href="/shop" className="block text-center text-xs opacity-35 hover:opacity-60 mt-3 transition-opacity">
+                  Continue shopping
+                </Link>
+                <div className="mt-4 pt-4 border-t space-y-1.5" style={{ borderColor: '#DDD7CB' }}>
+                  {['Premium production guarantee','Secure checkout','Ships in 3-7 business days','30-day returns'].map(t => (
+                    <div key={t} className="flex items-center gap-2 text-[10px] opacity-30">
+                      <div className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: '#C8341A' }} />
+                      {t}
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-black text-white text-base">${(item.price * item.quantity).toFixed(2)}</span>
-                      <button onClick={() => { removeFromCart(item.id); setCart(getCart()) }}
-                        className="p-1.5 text-gray-700 hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/10">
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-gray-950 border border-white/8 rounded-2xl p-5 sm:p-6 sticky top-20">
-              <h2 className="font-black text-lg mb-5">Order Summary</h2>
-              <div className="space-y-3 mb-5 text-sm">
-                <div className="flex justify-between text-gray-500">
-                  <span>Subtotal ({cart.reduce((a, c) => a + c.quantity, 0)} items)</span>
-                  <span className="text-white">${total.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-gray-500">
-                  <span>Shipping</span>
-                  <span className="text-green-400 font-semibold">{total >= 35 ? 'FREE' : 'Calculated at checkout'}</span>
-                </div>
-                {total >= 35 && (
-                  <div className="bg-green-500/10 border border-green-500/20 rounded-xl px-3 py-2 text-xs text-green-400 font-semibold">
-                    You qualify for free shipping!
-                  </div>
-                )}
-              </div>
-              <div className="border-t border-white/8 pt-4 mb-5">
-                <div className="flex justify-between font-black text-lg">
-                  <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
-                </div>
-              </div>
-              <Link href="/checkout"
-                className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-black py-4 rounded-2xl text-center block transition-all shadow-xl shadow-pink-500/20 hover:shadow-pink-500/30 active:scale-[0.98]">
-                Checkout with PayPal
-              </Link>
-              <Link href="/shop" className="w-full mt-3 bg-white/5 hover:bg-white/8 border border-white/10 text-gray-400 hover:text-white font-semibold py-3 rounded-2xl text-center block transition-all text-sm">
-                Continue Shopping
-              </Link>
-              <div className="mt-5 space-y-2">
-                {['Secure PayPal checkout', 'Free returns within 30 days', 'Printful quality guarantee'].map(t => (
-                  <div key={t} className="flex items-center gap-2 text-xs text-gray-700">
-                    <div className="w-1 h-1 rounded-full bg-green-500 flex-shrink-0" />
-                    {t}
-                  </div>
-                ))}
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )

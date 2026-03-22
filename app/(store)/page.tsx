@@ -48,13 +48,13 @@ export default async function HomePage() {
   const featuredImages = newArrivals.flatMap((p: any) => p.images ?? []).filter(Boolean).slice(0, 8)
 
   return (
-    <div className="bg-black text-white">
+    <div style={{ background: '#F5F0E8', color: '#1C1410' }}>
 
       {/* HERO */}
       <AnimatedHero bannerVideoUrl={BANNER_VIDEO} featuredImages={featuredImages} />
 
       {/* STATS STRIP */}
-      <section className="border-y border-white/5 bg-white/2 py-5">
+      <section className="border-y py-5" style={{ borderColor: '#DDD7CB', background: '#EDE8DE' }}>
         <div className="max-w-6xl mx-auto px-4 grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
           {[
             ['1,000+', 'Unique Designs'],
@@ -63,8 +63,8 @@ export default async function HomePage() {
             ['20mil', 'Premium Vinyl'],
           ].map(([num, label]) => (
             <div key={label}>
-              <div className="text-2xl sm:text-3xl font-black text-white">{num}</div>
-              <div className="text-xs text-white/30 mt-0.5 uppercase tracking-widest font-medium">{label}</div>
+              <div className="text-2xl sm:text-3xl font-black" style={{ color: '#1C1410' }}>{num}</div>
+              <div className="text-xs mt-0.5 uppercase tracking-widest font-medium opacity-40">{label}</div>
             </div>
           ))}
         </div>
@@ -72,7 +72,7 @@ export default async function HomePage() {
 
       {/* CATEGORIES */}
       {categories.length > 0 && (
-        <section className="py-20 sm:py-28 px-4">
+        <section className="py-20 sm:py-28 px-4" style={{ background: '#F5F0E8' }}>
           <div className="max-w-7xl mx-auto">
             <div className="mb-12">
               <p className="text-xs font-bold text-white/30 uppercase tracking-[0.3em] mb-3">Collections</p>
@@ -87,7 +87,7 @@ export default async function HomePage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
               {categories.map(cat => {
-                const accent = CAT_ACCENTS[cat.slug] ?? 'from-gray-900/60 to-gray-900/30 border-white/10'
+                const accent = CAT_ACCENTS[cat.slug] ?? 'border-[#DDD7CB]'
                 return (
                   <Link key={cat.id} href={`/shop/${cat.slug}`}
                     className={`group relative rounded-2xl aspect-[4/3] overflow-hidden border bg-gradient-to-br ${accent} hover:border-pink-500/40 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-pink-500/10 active:scale-[0.98]`}>
@@ -115,7 +115,7 @@ export default async function HomePage() {
 
       {/* NEW ARRIVALS */}
       {newArrivals.length > 0 && (
-        <section className="py-20 sm:py-28 px-4 border-t border-white/5">
+        <section className="py-20 sm:py-28 px-4 border-t" style={{ background: '#EDE8DE', borderColor: '#DDD7CB' }}>
           <div className="max-w-7xl mx-auto">
             <div className="flex items-end justify-between mb-12">
               <div>
@@ -132,8 +132,8 @@ export default async function HomePage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
               {newArrivals.map((product: any) => (
                 <Link key={product.id} href={`/product/${product.slug}`}
-                  className="group bg-white/3 hover:bg-white/5 rounded-2xl overflow-hidden border border-white/5 hover:border-pink-500/30 hover:-translate-y-1 hover:shadow-2xl hover:shadow-pink-500/10 transition-all duration-300 active:scale-[0.97]">
-                  <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-white/3 to-transparent">
+                  className="group rounded-2xl overflow-hidden border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg active:scale-[0.97]" style={{ background: '#FBF8F3', borderColor: '#E5DFD5' }}>
+                  <div className="aspect-square relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #EDE8DE, #E5DFD5)' }}>
                     {product.images?.[0] ? (
                       <Image src={product.images[0]} alt={product.name} fill
                         className="object-contain p-3 group-hover:scale-108 transition-transform duration-500"
@@ -149,8 +149,8 @@ export default async function HomePage() {
                     {product.categories?.name && (
                       <p className="text-[10px] text-pink-400/70 font-bold uppercase tracking-widest mb-1 truncate">{product.categories.name}</p>
                     )}
-                    <h3 className="font-bold text-white text-xs sm:text-sm line-clamp-2 leading-snug mb-2">{product.name}</h3>
-                    <p className="text-white font-black text-sm">${((product.price_cents ?? 1199)/100).toFixed(2)}</p>
+                    <h3 className="font-bold text-xs sm:text-sm line-clamp-2 leading-snug mb-2" style={{ color: '#1C1410' }}>{product.name}</h3>
+                    <p className="font-black text-sm" style={{ color: '#C8341A' }}>${((product.price_cents ?? 1199)/100).toFixed(2)}</p>
                   </div>
                 </Link>
               ))}
@@ -167,7 +167,7 @@ export default async function HomePage() {
       )}
 
       {/* QUALITY SECTION */}
-      <section className="py-20 sm:py-28 px-4 border-t border-white/5">
+      <section className="py-20 sm:py-28 px-4 border-t" style={{ background: '#EDE8DE', borderColor: '#DDD7CB' }}>
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div>
@@ -217,7 +217,7 @@ export default async function HomePage() {
       </section>
 
       {/* CTA BANNER */}
-      <section className="py-20 sm:py-28 px-4 border-t border-white/5">
+      <section className="py-20 sm:py-28 px-4 border-t" style={{ background: '#EDE8DE', borderColor: '#DDD7CB' }}>
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-white/30 uppercase tracking-[0.3em] mb-4">Ready to start?</p>
           <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight">

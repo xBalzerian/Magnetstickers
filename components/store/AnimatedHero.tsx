@@ -8,16 +8,15 @@ interface Props {
   featuredImages?: string[]
 }
 
-// Real sticker floating positions — show actual product images, no emojis
 const POSITIONS = [
   { top: '8%',  left: '3%',   size: 100, delay: 0,   dur: 7,   rot: -12 },
-  { top: '22%', left: '88%',  size: 88,  delay: 1.2, dur: 8.5, rot: 15  },
+  { top: '22%', left: '87%',  size: 88,  delay: 1.2, dur: 8.5, rot: 15  },
   { top: '62%', left: '5%',   size: 92,  delay: 0.6, dur: 6.5, rot: -8  },
-  { top: '70%', left: '84%',  size: 96,  delay: 2,   dur: 9,   rot: 10  },
-  { top: '40%', left: '91%',  size: 78,  delay: 0.3, dur: 7.5, rot: -18 },
+  { top: '70%', left: '83%',  size: 96,  delay: 2,   dur: 9,   rot: 10  },
+  { top: '42%', left: '91%',  size: 78,  delay: 0.3, dur: 7.5, rot: -18 },
   { top: '50%', left: '1%',   size: 82,  delay: 1.8, dur: 6,   rot: 20  },
-  { top: '12%', left: '55%',  size: 70,  delay: 2.5, dur: 8,   rot: -5  },
-  { top: '82%', left: '42%',  size: 76,  delay: 0.9, dur: 7,   rot: 12  },
+  { top: '14%', left: '55%',  size: 70,  delay: 2.5, dur: 8,   rot: -5  },
+  { top: '80%', left: '42%',  size: 76,  delay: 0.9, dur: 7,   rot: 12  },
 ]
 
 export default function AnimatedHero({ bannerVideoUrl, featuredImages = [] }: Props) {
@@ -30,89 +29,94 @@ export default function AnimatedHero({ bannerVideoUrl, featuredImages = [] }: Pr
     }
   }, [bannerVideoUrl])
 
-  const displayImages = featuredImages.slice(0, 8)
+  const imgs = featuredImages.slice(0, 8)
 
   return (
-    <section className="relative min-h-[95vh] flex items-center overflow-hidden bg-black">
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden"
+      style={{ background: 'linear-gradient(160deg, #2E1810 0%, #1C1410 40%, #200E0A 100%)' }}>
 
-      {/* VIDEO BG — Kling animated banner */}
+      {/* Video BG */}
       {bannerVideoUrl && (
         <video ref={videoRef} src={bannerVideoUrl} autoPlay muted loop playsInline
           onLoadedData={() => setVideoReady(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-2000 ${videoReady ? 'opacity-35' : 'opacity-0'}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-2000 ${videoReady ? 'opacity-25' : 'opacity-0'}`}
         />
       )}
 
-      {/* Gradient overlays — always visible */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/20 to-black/90 pointer-events-none z-[1]" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/60 pointer-events-none z-[1]" />
+      {/* Gradient overlays */}
+      <div className="absolute inset-0 pointer-events-none z-[1]"
+        style={{ background: 'linear-gradient(to bottom, rgba(28,20,16,0.7) 0%, rgba(28,20,16,0.1) 40%, rgba(28,20,16,0.85) 100%)' }} />
+      <div className="absolute inset-0 pointer-events-none z-[1]"
+        style={{ background: 'linear-gradient(to right, rgba(28,20,16,0.5) 0%, transparent 30%, transparent 70%, rgba(28,20,16,0.5) 100%)' }} />
 
-      {/* Ambient glow orbs */}
-      <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(236,72,153,0.08) 0%, transparent 70%)', animation: 'glow 6s ease-in-out infinite' }} />
-      <div className="absolute bottom-1/3 right-1/4 w-[500px] h-[500px] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%)', animation: 'glow 8s ease-in-out infinite', animationDelay: '3s' }} />
+      {/* Ambient orbs */}
+      <div className="absolute top-1/3 left-1/5 w-[500px] h-[500px] rounded-full pointer-events-none z-[1]"
+        style={{ background: 'radial-gradient(circle, rgba(200,52,26,0.12) 0%, transparent 70%)', animation: 'glow 6s ease-in-out infinite' }} />
+      <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] rounded-full pointer-events-none z-[1]"
+        style={{ background: 'radial-gradient(circle, rgba(232,90,32,0.10) 0%, transparent 70%)', animation: 'glow 8s ease-in-out infinite', animationDelay: '3s' }} />
 
-      {/* FLOATING STICKER IMAGES */}
-      {displayImages.map((img, i) => {
+      {/* Floating stickers */}
+      {imgs.map((img, i) => {
         const pos = POSITIONS[i] ?? POSITIONS[0]
         return (
           <div key={i} className="absolute pointer-events-none z-[2]"
-            style={{
-              top: pos.top, left: pos.left,
-              width: pos.size, height: pos.size,
+            style={{ top: pos.top, left: pos.left, width: pos.size, height: pos.size,
               animation: `float ${pos.dur}s ease-in-out infinite`,
               animationDelay: `${pos.delay}s`,
               '--rot': `${pos.rot}deg`,
             } as any}>
-            <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/60 bg-white/5 backdrop-blur-sm">
-              <Image src={img} alt="magnet sticker" fill className="object-contain p-2" sizes="120px" />
+            <div className="relative w-full h-full rounded-2xl overflow-hidden border shadow-2xl backdrop-blur-sm"
+              style={{ borderColor: 'rgba(245,240,232,0.12)', background: 'rgba(245,240,232,0.06)', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
+              <Image src={img} alt="" fill className="object-contain p-2" sizes="120px" />
             </div>
           </div>
         )
       })}
 
-      {/* Empty floating placeholder rings when no images yet */}
-      {displayImages.length === 0 && POSITIONS.slice(0, 6).map((pos, i) => (
-        <div key={i} className="absolute pointer-events-none z-[2] rounded-2xl border border-white/5"
-          style={{
-            top: pos.top, left: pos.left,
-            width: pos.size, height: pos.size,
-            background: 'rgba(255,255,255,0.02)',
+      {/* Empty rings */}
+      {imgs.length === 0 && POSITIONS.slice(0, 6).map((pos, i) => (
+        <div key={i} className="absolute pointer-events-none z-[2] rounded-2xl border"
+          style={{ top: pos.top, left: pos.left, width: pos.size, height: pos.size,
+            borderColor: 'rgba(245,240,232,0.05)',
+            background: 'rgba(245,240,232,0.02)',
             animation: `float ${pos.dur}s ease-in-out infinite`,
-            animationDelay: `${pos.delay}s`,
-          }} />
+            animationDelay: `${pos.delay}s` }} />
       ))}
 
-      {/* MAIN CONTENT */}
+      {/* Content */}
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 text-center py-24">
 
         {/* Eyebrow */}
-        <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm">
+        <div className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full border backdrop-blur-sm"
+          style={{ borderColor: 'rgba(245,240,232,0.12)', background: 'rgba(245,240,232,0.06)' }}>
           <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-          <span className="text-xs font-semibold text-white/60 tracking-widest uppercase">New designs added daily</span>
+          <span className="text-xs font-semibold tracking-widest uppercase opacity-60" style={{ color: '#F5F0E8' }}>New designs added daily</span>
         </div>
 
         {/* Headline */}
-        <h1 className="text-[clamp(3rem,8vw,7rem)] font-black leading-[0.9] tracking-tight text-white mb-6">
+        <h1 className="font-black leading-[0.9] tracking-tight mb-6" style={{
+          fontSize: 'clamp(3rem, 8vw, 7rem)',
+          color: '#F5F0E8'
+        }}>
           <span className="block">The World's</span>
-          <span className="block text-transparent bg-clip-text"
-            style={{ backgroundImage: 'linear-gradient(135deg, #f472b6 0%, #a855f7 50%, #6366f1 100%)' }}>
-            Biggest
-          </span>
+          <span className="block" style={{
+            background: 'linear-gradient(135deg, #F07030 0%, #C8341A 50%, #E85A20 100%)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+          }}>Biggest</span>
           <span className="block">Magnet Store</span>
         </h1>
 
-        {/* Subtitle */}
-        <p className="text-white/50 text-base sm:text-lg md:text-xl mb-10 max-w-xl mx-auto leading-relaxed">
+        {/* Sub */}
+        <p className="text-base sm:text-lg md:text-xl mb-10 max-w-xl mx-auto leading-relaxed"
+          style={{ color: 'rgba(245,240,232,0.50)' }}>
           Thousands of unique die-cut magnet stickers. Every breed, animal, fruit, quote and vibe.
         </p>
 
-        {/* Feature tags */}
+        {/* Tags */}
         <div className="flex flex-wrap justify-center gap-3 mb-10">
-          {['Premium 20mil Vinyl', 'Vivid Full-Color Print', 'Ships to 190+ Countries', 'Die-Cut Precision'].map(f => (
-            <span key={f}
-              className="text-xs font-semibold text-white/50 border border-white/10 px-3 py-1.5 rounded-full bg-white/3 backdrop-blur-sm">
+          {['Premium 20mil Vinyl','Vivid Full-Color','Ships Worldwide','Die-Cut Precision'].map(f => (
+            <span key={f} className="text-xs font-semibold border px-3 py-1.5 rounded-full backdrop-blur-sm"
+              style={{ color: 'rgba(245,240,232,0.45)', borderColor: 'rgba(245,240,232,0.12)', background: 'rgba(245,240,232,0.04)' }}>
               {f}
             </span>
           ))}
@@ -121,22 +125,23 @@ export default function AnimatedHero({ bannerVideoUrl, featuredImages = [] }: Pr
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/shop"
-            className="group relative overflow-hidden bg-white text-black font-black py-4 px-10 rounded-2xl text-base transition-all hover:scale-[1.02] shadow-2xl shadow-black/50 active:scale-[0.98]">
-            <span className="relative z-10">Shop All Magnets</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-pink-400 to-purple-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-            <span className="absolute inset-0 flex items-center justify-center z-20 text-white font-black opacity-0 group-hover:opacity-100 transition-opacity duration-300">Shop All Magnets</span>
+            className="group relative overflow-hidden font-black py-4 px-10 rounded-2xl text-base transition-all hover:scale-[1.02] shadow-xl active:scale-[0.98]"
+            style={{ background: 'linear-gradient(135deg, #C8341A, #E85A20)', color: '#F5F0E8', boxShadow: '0 4px 24px rgba(200,52,26,0.4)' }}>
+            Shop All Magnets
           </Link>
           <Link href="/shop/animals-dogs"
-            className="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white font-bold py-4 px-10 rounded-2xl text-base transition-all hover:scale-[1.02] backdrop-blur-sm active:scale-[0.98]">
+            className="font-bold py-4 px-10 rounded-2xl text-base transition-all hover:scale-[1.02] active:scale-[0.98] border backdrop-blur-sm"
+            style={{ borderColor: 'rgba(245,240,232,0.15)', color: 'rgba(245,240,232,0.75)', background: 'rgba(245,240,232,0.06)' }}>
             Dog Breeds
           </Link>
         </div>
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 text-white/20">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5"
+        style={{ color: 'rgba(245,240,232,0.2)' }}>
         <span className="text-[10px] tracking-[0.3em] uppercase font-medium">Scroll</span>
-        <div className="w-px h-8 bg-gradient-to-b from-white/20 to-transparent" />
+        <div className="w-px h-8" style={{ background: 'linear-gradient(to bottom, rgba(245,240,232,0.2), transparent)' }} />
       </div>
     </section>
   )

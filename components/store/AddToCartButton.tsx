@@ -1,7 +1,15 @@
 'use client'
 import { useState } from 'react'
-import { ShoppingCart, Check, Plus, Minus } from 'lucide-react'
-import { addToCart } from '@/lib/cart'
+import { addToCart, type CartItem } from '@/lib/cart'
+
+interface Size {
+  id: string
+  label: string
+  dims: string
+  cents: number
+  note: string
+  popular?: boolean
+}
 
 interface Props {
   product: {
@@ -9,66 +17,104 @@ interface Props {
     name: string
     slug: string
     images?: string[]
-    price?: number
     price_cents?: number
+    price?: number
   }
+  sizes?: readonly Size[]
 }
 
-export default function AddToCartButton({ product }: Props) {
+const DEFAULT_SIZES: Size[] = [
+  { id: 'sm',  label: 'Small',  dims: '3″ × 3″',  cents: 899,  note: 'Perfect for laptops & books' },
+  { id: 'md',  label: 'Medium', dims: '4″ × 4″',  cents: 1199, note: 'Most popular size', popular: true },
+  { id: 'lg',  label: 'Large',  dims: '6″ × 6″',  cents: 1599, note: 'Statement piece for the fridge' },
+]
+
+export default function AddToCartButton({ product, sizes }: Props) {
+  const sizeOptions = (sizes ?? DEFAULT_SIZES) as Size[]
+  const [selectedSize, setSelectedSize] = useState(sizeOptions.find(s => s.popular)?.id ?? sizeOptions[0]?.id ?? 'md')
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
 
+  const activeSize = sizeOptions.find(s => s.id === selectedSize) ?? sizeOptions[0]
+  const unitPrice = (activeSize?.cents ?? 1199) / 100
+  const total = unitPrice * qty
+
   function handleAdd() {
-    addToCart({
-      id: product.id,
+    const item: CartItem = {
+      productId: product.id,
       name: product.name,
       slug: product.slug,
-      price: (product.price_cents ?? (product.price ?? 11.99) * 100) / 100,
-      image: product.images?.[0] ?? null,
+      image: product.images?.[0] ?? '',
+      price: unitPrice,
       quantity: qty,
-    })
+      size: activeSize?.label ?? 'Medium',
+      sizeDims: activeSize?.dims ?? '4″ × 4″',
+    }
+    addToCart(item)
     setAdded(true)
-    setTimeout(() => setAdded(false), 2500)
+    setTimeout(() => setAdded(false), 2000)
   }
 
   return (
-    <div className="flex flex-col gap-3 w-full">
-      {/* Qty + Add to Cart row */}
-      <div className="flex items-center gap-3">
-        {/* Qty */}
-        <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl p-1.5">
-          <button onClick={() => setQty(q => Math.max(1, q - 1))}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white">
-            <Minus size={14} />
+    <div>
+      {/* SIZE OPTIONS */}
+      <div className="space-y-2 mb-5">
+        {sizeOptions.map(s => (
+          <button key={s.id} onClick={() => setSelectedSize(s.id)}
+            className="w-full flex items-center justify-between p-3.5 rounded-xl border text-left transition-all"
+            style={{
+              background: selectedSize === s.id ? '#FFF8F0' : '#EDE8DE',
+              borderColor: selectedSize === s.id ? '#C8341A' : '#DDD7CB',
+              borderWidth: selectedSize === s.id ? 2 : 1,
+            }}>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-5 h-5 rounded-full border-2"
+                style={{ borderColor: selectedSize === s.id ? '#C8341A' : '#DDD7CB' }}>
+                {selectedSize === s.id && <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#C8341A' }} />}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold" style={{ color: '#1C1410' }}>{s.label}</span>
+                  <span className="text-xs opacity-40">{s.dims}</span>
+                  {s.popular && (
+                    <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full text-white"
+                      style={{ background: '#C8341A' }}>Popular</span>
+                  )}
+                </div>
+                <span className="text-[10px] opacity-35">{s.note}</span>
+              </div>
+            </div>
+            <span className="font-black text-sm" style={{ color: selectedSize === s.id ? '#C8341A' : '#1C1410' }}>
+              ${(s.cents / 100).toFixed(2)}
+            </span>
           </button>
-          <span className="font-black text-white text-base min-w-[28px] text-center">{qty}</span>
-          <button onClick={() => setQty(q => q + 1)}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white">
-            <Plus size={14} />
+        ))}
+      </div>
+
+      {/* QTY + ADD TO CART */}
+      <div className="flex gap-3 items-stretch">
+        <div className="flex items-center border rounded-xl overflow-hidden" style={{ borderColor: '#DDD7CB' }}>
+          <button onClick={() => setQty(Math.max(1, qty - 1))}
+            className="px-3.5 py-3 text-sm font-bold transition-colors hover:opacity-70"
+            style={{ color: '#1C1410' }}>
+            −
+          </button>
+          <span className="px-3 text-sm font-black" style={{ color: '#1C1410', minWidth: '2rem', textAlign: 'center' }}>{qty}</span>
+          <button onClick={() => setQty(qty + 1)}
+            className="px-3.5 py-3 text-sm font-bold transition-colors hover:opacity-70"
+            style={{ color: '#1C1410' }}>
+            +
           </button>
         </div>
 
-        {/* Add to cart */}
         <button onClick={handleAdd}
-          className={`flex-1 flex items-center justify-center gap-2 font-black py-3.5 rounded-2xl transition-all text-sm shadow-lg active:scale-[0.98]
-            ${added
-              ? 'bg-green-500 text-white shadow-green-500/20'
-              : 'bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white shadow-pink-500/20 hover:shadow-pink-500/30'
-            }`}>
-          {added ? (
-            <><Check size={16} /> Added to Cart</>
-          ) : (
-            <><ShoppingCart size={16} /> Add to Cart</>
-          )}
+          className="flex-1 font-black py-3 px-6 rounded-xl text-base transition-all hover:opacity-90 active:scale-[0.98] shadow-md text-white"
+          style={added
+            ? { background: '#2E8B57' }
+            : { background: 'linear-gradient(135deg, #C8341A, #E85A20)', boxShadow: '0 4px 16px rgba(200,52,26,0.3)' }}>
+          {added ? '✓ Added!' : `Add to Cart — $${total.toFixed(2)}`}
         </button>
       </div>
-
-      {/* Total preview */}
-      {qty > 1 && (
-        <p className="text-xs text-gray-600 text-center">
-          {qty} magnets = <span className="text-white font-bold">${(((product.price_cents ?? 1199) / 100) * qty).toFixed(2)}</span>
-        </p>
-      )}
     </div>
   )
 }

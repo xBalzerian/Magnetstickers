@@ -10,30 +10,26 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  background: #000;
-  color: #fff;
+/* ── Brand palette: warm cream + deep red-orange ── */
+:root {
+  --cream:   #F5F0E8;
+  --cream2:  #EDE8DE;
+  --cream3:  #DDD7CB;
+  --ink:     #1C1410;
+  --ink2:    #2E2219;
+  --red:     #C8341A;
+  --orange:  #E85A20;
+  --warm:    #F07030;
+  --gold:    #C97A28;
 }
+
+body { background: var(--cream); color: var(--ink); }
 
 /* Float animation */
 @keyframes float {
   0%, 100% { transform: translateY(0px) rotate(var(--rot, 0deg)); }
   33%       { transform: translateY(-14px) rotate(calc(var(--rot, 0deg) + 2deg)); }
   66%       { transform: translateY(-6px) rotate(calc(var(--rot, 0deg) - 2deg)); }
-}
-
-/* Slow drift */
-@keyframes drift {
-  0%, 100% { transform: translateY(0px) translateX(0px); }
-  25%       { transform: translateY(-20px) translateX(8px); }
-  50%       { transform: translateY(-10px) translateX(-5px); }
-  75%       { transform: translateY(-25px) translateX(3px); }
-}
-
-/* Subtle glow pulse */
-@keyframes glow {
-  0%, 100% { opacity: 0.3; }
-  50%       { opacity: 0.7; }
 }
 
 /* Shimmer skeleton */
@@ -48,14 +44,20 @@ body {
   100% { transform: translateX(-50%); }
 }
 
+/* Glow pulse */
+@keyframes glow {
+  0%, 100% { opacity: 0.15; }
+  50%       { opacity: 0.40; }
+}
+
 .skeleton {
-  background: linear-gradient(90deg, #111 25%, #1a1a1a 50%, #111 75%);
+  background: linear-gradient(90deg, #DDD7CB 25%, #E8E2D6 50%, #DDD7CB 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
 .marquee-track {
-  animation: marquee 30s linear infinite;
+  animation: marquee 35s linear infinite;
 }
 
 .line-clamp-2 {
@@ -65,11 +67,17 @@ body {
   overflow: hidden;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #000; }
-::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #ec4899; }
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
-/* Selection */
-::selection { background: rgba(236, 72, 153, 0.3); color: #fff; }
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--cream2); }
+::-webkit-scrollbar-thumb { background: var(--cream3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--warm); }
+
+::selection { background: rgba(200,52,26,0.2); color: var(--ink); }
